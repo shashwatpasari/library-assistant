@@ -2,7 +2,7 @@ import os
 
 # PostgreSQL connection string
 # Format: postgresql://username:password@host:port/database
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://shashwatpasari@localhost:5432/library_assistant")
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://localhost:5432/library_assistant")
 
 # Ollama API endpoint (where your local LLM is running)
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")

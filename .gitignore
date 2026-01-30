@@ -17,6 +17,7 @@ npm-debug.log*
 *.db
 *.sqlite3
 postgres_data/
+backend/library.db
 
 # OS
 .DS_Store
@@ -35,3 +36,16 @@ backend/scripts/*
 !backend/scripts/migrate_to_postgres.py
 !backend/scripts/goodreads_list_books_sample.csv
 !backend/scripts/__init__.py
+
+# Documentation
+docs/
+backend/docs/
+
+# Large data files in scripts
+backend/scripts/*.csv
+!backend/scripts/goodreads_list_books_sample.csv
+backend/scripts/*.zip
+backend/scripts/*.ipynb
+
+# Frontend scratch/dev directories
+frontend/stitch_book_details_and_chat/
