@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Library Catalog</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<style type="text/tailwindcss">
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<script>
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#3A86FF",
+              "secondary": "#FFBE0B",
+              "background-light": "#F8F9FA",
+              "background-dark": "#111921",
+              "text-light": "#212529",
+              "text-dark": "#f8f9fa",
+              "border-light": "#DEE2E6",
+              "border-dark": "#343a40"
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.5rem", "lg": "0.75rem", "xl": "1rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark">
+<div class="relative flex min-h-screen w-full flex-col">
+<!-- TopNavBar -->
+<header class="sticky top-0 z-10 w-full border-b border-border-light dark:border-border-dark bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-sm">
+<div class="container mx-auto flex items-center justify-between whitespace-nowrap px-4 sm:px-6 lg:px-8 py-3">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-2 text-text-light dark:text-text-dark">
+<span class="material-symbols-outlined text-primary text-3xl">local_library</span>
+<h2 class="text-xl font-bold tracking-tight">Library</h2>
+</div>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-sm font-medium hover:text-primary dark:hover:text-primary transition-colors" href="#">Home</a>
+<a class="text-sm font-medium text-primary" href="#">Catalog</a>
+<a class="text-sm font-medium hover:text-primary dark:hover:text-primary transition-colors" href="#">My Books</a>
+</nav>
+</div>
+<div class="flex flex-1 items-center justify-end gap-4">
+<div class="hidden sm:block">
+<label class="relative flex items-center h-10 w-full max-w-xs">
+<span class="material-symbols-outlined absolute left-3 text-gray-500 dark:text-gray-400">search</span>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-full border-border-light dark:border-border-dark bg-white dark:bg-gray-800 text-text-light dark:text-text-dark h-full placeholder:text-gray-500 dark:placeholder:text-gray-400 pl-10 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent" placeholder="Search..." value=""/>
+</label>
+</div>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="User avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAqlpG97JivX8DfZEz4nfPbUcdl4oC3PgCVulGdicKXMtGZnhpWsWPgKhHEvU2WxvX-sQhM9OzqueSzGvflwm5hiO0ZhkqdturOKTFzSP-kvCIfUBKzqRLdsqAwlPAcYNiEq7lXlIbfKwUqOrv78RlshD_PZqFwNRAcRJReuqTgOGhONluQZ69ljTsGBEW7dvkEmvTEHxKQ303PpU13uPwo2Kdi0HfS8wVDTXI4RSzoJSPvPamCsbttpcRviUJv2gHkbTQRhG_ZeJyj");'></div>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+<!-- PageHeading -->
+<div class="flex flex-wrap items-center justify-between gap-4 mb-8">
+<h1 class="text-3xl md:text-4xl font-black tracking-tighter">Explore Our Collection</h1>
+</div>
+<!-- SearchBar for mobile -->
+<div class="sm:hidden mb-6">
+<label class="relative flex items-center h-12 w-full">
+<span class="material-symbols-outlined absolute left-4 text-gray-500 dark:text-gray-400">search</span>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-full border-border-light dark:border-border-dark bg-white dark:bg-gray-800 text-text-light dark:text-text-dark h-full placeholder:text-gray-500 dark:placeholder:text-gray-400 pl-12 pr-4 text-base" placeholder="Search by title or author..." value=""/>
+</label>
+</div>
+<!-- Chips / Filters -->
+<div class="flex flex-wrap gap-2 mb-8">
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full px-4 text-sm font-medium bg-primary text-white">All</button>
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full px-4 text-sm font-medium bg-white dark:bg-gray-800 border border-border-light dark:border-border-dark hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors">Fiction</button>
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full px-4 text-sm font-medium bg-white dark:bg-gray-800 border border-border-light dark:border-border-dark hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors">Science</button>
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full px-4 text-sm font-medium bg-white dark:bg-gray-800 border border-border-light dark:border-border-dark hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors">History</button>
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full px-4 text-sm font-medium bg-white dark:bg-gray-800 border border-border-light dark:border-border-dark hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors">Mystery</button>
+<button class="flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full px-4 text-sm font-medium bg-white dark:bg-gray-800 border border-border-light dark:border-border-dark hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors">Biography</button>
+</div>
+<!-- ImageGrid / Book List -->
+<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 md:gap-8">
+<!-- Book Card -->
+<div class="group flex flex-col gap-3">
+<div class="relative w-full overflow-hidden bg-center bg-no-repeat aspect-[3/4] bg-cover rounded-lg shadow-md transition-transform duration-300 group-hover:scale-105">
+<div class="w-full h-full bg-cover bg-center" data-alt="Cover for The Midnight Library" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBWs4hmpPZXHhbFYX_sl0tJVHYF54BOKKVtGyr3PXeNwbVcxVhI2vTClAtJ37FIp_BZ7bk-S-1jQgBZ5bkCOpuX_DW5C0CK9WFFtzxmbnFM2YaqoG4IrrP5t6gJXE_179AfY-3jjOeJN_6mMnFoT6polzuhHW12Y6tiiWMKTekn0aD8tbVyHvkQoEOFqLDh5DFyPh_ULyQjvuwwKNFZxOaz7oeRteI9ne3-Vzvr4gfIZwhpZOs7jcVJTpIEqksiwXDFOwk7_rLgfuWD");'></div>
+<button aria-label="Add to My Books" class="absolute top-2 right-2 flex items-center justify-center size-8 rounded-full bg-black/30 backdrop-blur-sm text-white hover:bg-primary/80 transition-colors">
+<span class="material-symbols-outlined text-base">favorite</span>
+</button>
+</div>
+<div>
+<p class="text-base font-medium leading-tight truncate">The Midnight Library</p>
+<p class="text-sm text-gray-600 dark:text-gray-400">Matt Haig</p>
+</div>
+</div>
+<!-- Book Card -->
+<div class="group flex flex-col gap-3">
+<div class="relative w-full overflow-hidden bg-center bg-no-repeat aspect-[3/4] bg-cover rounded-lg shadow-md transition-transform duration-300 group-hover:scale-105">
+<div class="w-full h-full bg-cover bg-center" data-alt="Cover for Project Hail Mary" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDwway8pI6FkE7E-STfaheCFzHnFpjIcX4iBiR3RXQ8c1Nsos9Lp09CSdwzAtwtheBXnBRHgtglTG1fiiKlpVunaEG_OlXSWyCp_4BxYhzhNm0o9smZo0lNZUysYcRMnUXBeWpVXFbiCWfzZpiFqyNNnds47KBGTChqYrxziAz_npcL3Orq6tCGHMvgxp-6opnMMyrygkxmJ6so7xB3poLQMDWJ6vNk0PI_xaFcwg-cqsM1ZzuPtrCAkQMuRv4sCa49wuvHpnq-idfj");'></div>
+<button aria-label="Add to My Books" class="absolute top-2 right-2 flex items-center justify-center size-8 rounded-full bg-black/30 backdrop-blur-sm text-white hover:bg-primary/80 transition-colors">
+<span class="material-symbols-outlined text-base">favorite</span>
+</button>
+</div>
+<div>
+<p class="text-base font-medium leading-tight truncate">Project Hail Mary</p>
+<p class="text-sm text-gray-600 dark:text-gray-400">Andy Weir</p>
+</div>
+</div>
+<!-- Book Card -->
+<div class="group flex flex-col gap-3">
+<div class="relative w-full overflow-hidden bg-center bg-no-repeat aspect-[3/4] bg-cover rounded-lg shadow-md transition-transform duration-300 group-hover:scale-105">
+<div class="w-full h-full bg-cover bg-center" data-alt="Cover for A Brief History of Time" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBkC3HLDuvA41ie8TSFAF8aMYSM4u_RxEvBMpVFkwNlO2FQgWIkouRt1NA_OK5fa_F7yBNjochMul1UhnfR7fqAoz4NzHdcmG69Gni_XIl7eIcI_-tXJ5DLPLfnW0Atz_-UzZ99TRNyeVzXvKs9M_KGDp1LWgX6YUys5VHmz7CkDQGJlWRFlrX8fUmuL-wGfbUX598NEqZn1B8sFJJWmMpL0QRwwZYyrTN6FmEsjLA2rnMe1MoRr3R9NN_oRepybqCINbpum1XKfwZZ");'></div>
+<button aria-label="Add to My Books" class="absolute top-2 right-2 flex items-center justify-center size-8 rounded-full bg-black/30 backdrop-blur-sm text-white hover:bg-primary/80 hover:text-red-500 transition-colors">
+<span class="material-symbols-outlined text-base" style="font-variation-settings: 'FILL' 1, 'wght' 700;">favorite</span>
+</button>
+</div>
+<div>
+<p class="text-base font-medium leading-tight truncate">A Brief History of Time</p>
+<p class="text-sm text-gray-600 dark:text-gray-400">Stephen Hawking</p>
+</div>
+</div>
+<!-- Book Card -->
+<div class="group flex flex-col gap-3">
+<div class="relative w-full overflow-hidden bg-center bg-no-repeat aspect-[3/4] bg-cover rounded-lg shadow-md transition-transform duration-300 group-hover:scale-105">
+<div class="w-full h-full bg-cover bg-center" data-alt="Cover for The Wright Brothers" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDsQwhFErssxKWW7qZJ4Z5GNgyOuRakAuI_PMX2LKLcb0nfVCd_MK4jW2nZTK0nYk9bvlS7_xadBaue48ybN8zKKS-a3ECc1GSiSffd_jv9bVBFFQfqB3ML7Y4vLQoxdB4o-Hl6KXbEod0D1hlHsCJoS6T_PNBDJonuSAOt0blJBII_KsGZgDI7U5kW6VIT7jK66A8FBD3PfpGVRE9gJQdvVGa7Lk0VxPS8EzQR5RBoxLwHRs98R5IYVPfIOKGdpv4xh9D6E3TWntkQ");'></div>
+<button aria-label="Add to My Books" class="absolute top-2 right-2 flex items-center justify-center size-8 rounded-full bg-black/30 backdrop-blur-sm text-white hover:bg-primary/80 transition-colors">
+<span class="material-symbols-outlined text-base">favorite</span>
+</button>
+</div>
+<div>
+<p class="text-base font-medium leading-tight truncate">The Wright Brothers</p>
+<p class="text-sm text-gray-600 dark:text-gray-400">David McCullough</p>
+</div>
+</div>
+<!-- Book Card -->
+<div class="group flex flex-col gap-3">
+<div class="relative w-full overflow-hidden bg-center bg-no-repeat aspect-[3/4] bg-cover rounded-lg shadow-md transition-transform duration-300 group-hover:scale-105">
+<div class="w-full h-full bg-cover bg-center" data-alt="Cover for The Silent Patient" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCesqsw01nBBu8ca3WWk_oBNP25Xo5MHW_S8r8n4eNWLg9g3AIx2ArP0CGxjYjEL_tjHRcWivdRI4eDYZqm_VNlSBLzilcNVL4Jp06vhzWMpV2KUQLwJzA8Cp1qgZy6KS0DqjA-gxibH4k3ofCFyEO9dephqvCR9umYI66ftHKQPPGMZNL6HP618m8iaGoZKNqKQCdhBJW2nitLdxJruoBTFMOVIWUbQ3udG2P6Y6CjMDfnOKuFX8Os7auUDMQBy6zF0o5ZHLgBVW5Z");'></div>
+<button aria-label="Add to My Books" class="absolute top-2 right-2 flex items-center justify-center size-8 rounded-full bg-black/30 backdrop-blur-sm text-white hover:bg-primary/80 transition-colors">
+<span class="material-symbols-outlined text-base">favorite</span>
+</button>
+</div>
+<div>
+<p class="text-base font-medium leading-tight truncate">The Silent Patient</p>
+<p class="text-sm text-gray-600 dark:text-gray-400">Alex Michaelides</p>
+</div>
+</div>
+<!-- Book Card -->
+<div class="group flex flex-col gap-3">
+<div class="relative w-full overflow-hidden bg-center bg-no-repeat aspect-[3/4] bg-cover rounded-lg shadow-md transition-transform duration-300 group-hover:scale-105">
+<div class="w-full h-full bg-cover bg-center" data-alt="Cover for Becoming" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAXXU-BJkTuF8mHES6gpb1iNLXVv2qoGZ-bMxam6onAasDyT2Joum0w6LQ5UvbSQMusH3XpEsRSF_XcViVW5cTbcRZElCK0awBiPKerapBimMIQvgjvFKCIMpvGnfFaB8ipFaozHCNnvgiHsRYS_tGM5OSK95fJg2jp5QDQrDWj-hBbtSViQsAUDFf6iXKrUR_6HxBRkdEkldW1leBsKFImstVYeFWjB66nVlYAtHIqh9CS-AOVBtuPMJ5c_YTwzTs88A24o5AYpOH2");'></div>
+<button aria-label="Add to My Books" class="absolute top-2 right-2 flex items-center justify-center size-8 rounded-full bg-black/30 backdrop-blur-sm text-white hover:bg-primary/80 transition-colors">
+<span class="material-symbols-outlined text-base">favorite</span>
+</button>
+</div>
+<div>
+<p class="text-base font-medium leading-tight truncate">Becoming</p>
+<p class="text-sm text-gray-600 dark:text-gray-400">Michelle Obama</p>
+</div>
+</div>
+<!-- Book Card -->
+<div class="group flex flex-col gap-3">
+<div class="relative w-full overflow-hidden bg-center bg-no-repeat aspect-[3/4] bg-cover rounded-lg shadow-md transition-transform duration-300 group-hover:scale-105">
+<div class="w-full h-full bg-cover bg-center" data-alt="Cover for Dune" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB8XFcfjAdyfhq_YMff8TABDh_R4Zd_S0aRO9BUBlO2rjcoJlSM6l3KjcNY5ZUL5G-eFwyrsVb4c60o0F6aVxTp5v1IFy1jr9fAA_wXQ33wk5zYRQKOelvqAe6A0hX9mkPtgZKc_3ychUv4mGt2cJDiKMe0CUcW0baO9RtTACH1WUCT6JGwBsOcLWx6FKcQ9LSHNrGhyGwCuuN8TS9SKdi7rfxPmQM0Tdi9MFNVrY8h0wdZGoQOnhDhPubQKlN3P_gTJJ5yu0GGYjYN");'></div>
+<button aria-label="Add to My Books" class="absolute top-2 right-2 flex items-center justify-center size-8 rounded-full bg-black/30 backdrop-blur-sm text-white hover:bg-primary/80 transition-colors">
+<span class="material-symbols-outlined text-base">favorite</span>
+</button>
+</div>
+<div>
+<p class="text-base font-medium leading-tight truncate">Dune</p>
+<p class="text-sm text-gray-600 dark:text-gray-400">Frank Herbert</p>
+</div>
+</div>
+<!-- Book Card -->
+<div class="group flex flex-col gap-3">
+<div class="relative w-full overflow-hidden bg-center bg-no-repeat aspect-[3/4] bg-cover rounded-lg shadow-md transition-transform duration-300 group-hover:scale-105">
+<div class="w-full h-full bg-cover bg-center" data-alt="Cover for Cosmos" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCLD8KksFBvsbW_DFi1O_Bjie6_TDjICg_fEm1puAD3RY7QDJz-TUawX65-krtPoC10VUFte8rUf98mgDvLUNtkK9p4cdx3tGC8vZV642iqj91_z_igjUj82abOYMjCgeIpIZw3OkTsEaKE9Kxk3JfM92soIWed8gg70Zz2lslu0bmYQgoFeGYok690ziSCsTqWO0bKEgzLd8ZjWGuG8J4gc2rhIJ24HR-K156o1cvDiIDebtuAXp7zizFkuRF_YpTA-aVbZyA-PiTf");'></div>
+<button aria-label="Add to My Books" class="absolute top-2 right-2 flex items-center justify-center size-8 rounded-full bg-black/30 backdrop-blur-sm text-white hover:bg-primary/80 transition-colors">
+<span class="material-symbols-outlined text-base">favorite</span>
+</button>
+</div>
+<div>
+<p class="text-base font-medium leading-tight truncate">Cosmos</p>
+<p class="text-sm text-gray-600 dark:text-gray-400">Carl Sagan</p>
+</div>
+</div>
+<!-- Book Card -->
+<div class="group flex flex-col gap-3">
+<div class="relative w-full overflow-hidden bg-center bg-no-repeat aspect-[3/4] bg-cover rounded-lg shadow-md transition-transform duration-300 group-hover:scale-105">
+<div class="w-full h-full bg-cover bg-center" data-alt="Cover for Sapiens: A Brief History of Humankind" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCP1E9vWtUAQf4PGVJCH-0xhHT5knmkoK4R0xZUShPGjdUeTqQzlWSA3TM6ZeMHYqNxFrNymTVualrNkVdk8MtNacoHXYLPu19rSfNysEU60sBu9VhRwHWssArVnnO8FBDu2RMtJ33rh9_yM4IF7S5SQzqZZXzdPDAPEEyO9ycIvuvmFhdP5WpwyrpNcDc90LhvTAkZblriYc4L3CFMTYl3I8HJYzcJFedGvK9dqSFiz2JtZFPPRdtcifopqII0kbgjuhLyYoyE8O9i");'></div>
+<button aria-label="Add to My Books" class="absolute top-2 right-2 flex items-center justify-center size-8 rounded-full bg-black/30 backdrop-blur-sm text-white hover:bg-primary/80 transition-colors">
+<span class="material-symbols-outlined text-base">favorite</span>
+</button>
+</div>
+<div>
+<p class="text-base font-medium leading-tight truncate">Sapiens</p>
+<p class="text-sm text-gray-600 dark:text-gray-400">Yuval Noah Harari</p>
+</div>
+</div>
+<!-- Book Card -->
+<div class="group flex flex-col gap-3">
+<div class="relative w-full overflow-hidden bg-center bg-no-repeat aspect-[3/4] bg-cover rounded-lg shadow-md transition-transform duration-300 group-hover:scale-105">
+<div class="w-full h-full bg-cover bg-center" data-alt="Cover for Educated" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB4URkZwIpSxRiAxdqsFkx7e0RiZGp_uRw_PEYD6i7y_aSaSu3NHB2_9A-kQOhNxNSK3sOLZqaOeyaJ_tEjAHbRdQCEamEhY56BratyxIxk6ecp1EpuP7pzNP5YkbquXm1coWKjuOE1YS3eBVWDlE7BytKb3vgjegwuEBDjkUQPD7ZL4XndmS7WZSFdDSNC1jT5eU4Bsk0LB1Qmu_aMkXQN3vV8BFZdUvsI1YratQk6OENr-wglhyOPdhyXp_3J08aCpzaGaU3ELCZt");'></div>
+<button aria-label="Add to My Books" class="absolute top-2 right-2 flex items-center justify-center size-8 rounded-full bg-black/30 backdrop-blur-sm text-white hover:bg-primary/80 transition-colors">
+<span class="material-symbols-outlined text-base">favorite</span>
+</button>
+</div>
+<div>
+<p class="text-base font-medium leading-tight truncate">Educated</p>
+<p class="text-sm text-gray-600 dark:text-gray-400">Tara Westover</p>
+</div>
+</div>
+<!-- Book Card -->
+<div class="group flex flex-col gap-3">
+<div class="relative w-full overflow-hidden bg-center bg-no-repeat aspect-[3/4] bg-cover rounded-lg shadow-md transition-transform duration-300 group-hover:scale-105">
+<div class="w-full h-full bg-cover bg-center" data-alt="Cover for And Then There Were None" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuD0XlpHc4KGJOu0CHJucOR-XyBwbs078sfutyt6Rgup1sk3nFiiivBGMZ35VQaTnCy6UtOvyG6kDnp7TLxidYMbyiSjpi3xx29e_xN2YcahYJZIthP9Yvp9uz6dP8QdUkxfiNhIx14gP4kGCcxTX8LC_EwGytwzC7k7OOr2B8fG639svw5fj0ar8oB_X_9OxXh2bCb0LLhiLgTCXWYpYpYBNDI4rdIz6emx5LS3jagFGu5iIDxeG8bIPGyswJayP8ONy09E86yncT-l");'></div>
+<button aria-label="Add to My Books" class="absolute top-2 right-2 flex items-center justify-center size-8 rounded-full bg-black/30 backdrop-blur-sm text-white hover:bg-primary/80 transition-colors">
+<span class="material-symbols-outlined text-base">favorite</span>
+</button>
+</div>
+<div>
+<p class="text-base font-medium leading-tight truncate">And Then There Were None</p>
+<p class="text-sm text-gray-600 dark:text-gray-400">Agatha Christie</p>
+</div>
+</div>
+<!-- Book Card -->
+<div class="group flex flex-col gap-3">
+<div class="relative w-full overflow-hidden bg-center bg-no-repeat aspect-[3/4] bg-cover rounded-lg shadow-md transition-transform duration-300 group-hover:scale-105">
+<div class="w-full h-full bg-cover bg-center" data-alt="Cover for Steve Jobs" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCF5VV88nCBjA_g2hYPvlksnj1_5KWKuFFj-Xdl4SYs0bNERZEpH57dAygOxuGbZ5J563Oc_iqt9uaK70RVlSry1XCLXpCafSi-lHNG-TjT8UiiwlmSdRxcHQBfnrUKSUx9FNZSZR_V1do7oV7eRWCdWH4BZDqQIzFvfUA6MahtphBpDy9pvZkd3Vcq91ymdcG7ZC4m_ONpdpX5-lNRGURqzWd5dZ0Vye7d1_Sus6Oh7B3i3Wxrf0C0I9Wm1xVBaT_Y3bVXrykf-XZZ");'></div>
+<button aria-label="Add to My Books" class="absolute top-2 right-2 flex items-center justify-center size-8 rounded-full bg-black/30 backdrop-blur-sm text-white hover:bg-primary/80 transition-colors">
+<span class="material-symbols-outlined text-base">favorite</span>
+</button>
+</div>
+<div>
+<p class="text-base font-medium leading-tight truncate">Steve Jobs</p>
+<p class="text-sm text-gray-600 dark:text-gray-400">Walter Isaacson</p>
+</div>
+</div>
+</div>
+<!-- Pagination -->
+<div class="mt-12 flex items-center justify-center">
+<nav aria-label="Pagination" class="flex items-center gap-2">
+<a class="inline-flex items-center justify-center size-9 rounded-full text-sm font-medium border border-border-light dark:border-border-dark hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-base">chevron_left</span>
+</a>
+<a class="inline-flex items-center justify-center size-9 rounded-full text-sm font-medium border border-border-light dark:border-border-dark bg-primary text-white" href="#">1</a>
+<a class="inline-flex items-center justify-center size-9 rounded-full text-sm font-medium border border-border-light dark:border-border-dark hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" href="#">2</a>
+<a class="inline-flex items-center justify-center size-9 rounded-full text-sm font-medium border border-border-light dark:border-border-dark hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" href="#">3</a>
+<span class="inline-flex items-center justify-center size-9 text-sm font-medium">...</span>
+<a class="inline-flex items-center justify-center size-9 rounded-full text-sm font-medium border border-border-light dark:border-border-dark hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" href="#">8</a>
+<a class="inline-flex items-center justify-center size-9 rounded-full text-sm font-medium border border-border-light dark:border-border-dark hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" href="#">
+<span class="material-symbols-outlined text-base">chevron_right</span>
+</a>
+</nav>
+</div>
+</main>
+<!-- Footer -->
+<footer class="mt-auto border-t border-border-light dark:border-border-dark bg-white dark:bg-gray-900">
+<div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+<div class="flex flex-col md:flex-row justify-between items-center gap-6">
+<p class="text-sm text-gray-600 dark:text-gray-400">© 2024 Library Management. All Rights Reserved.</p>
+<div class="flex items-center gap-6">
+<a class="text-sm text-gray-600 dark:text-gray-400 hover:text-primary transition-colors" href="#">Contact</a>
+<a class="text-sm text-gray-600 dark:text-gray-400 hover:text-primary transition-colors" href="#">Hours</a>
+<a class="text-sm text-gray-600 dark:text-gray-400 hover:text-primary transition-colors" href="#">Social</a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+</body></html>

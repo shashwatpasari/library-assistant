@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Library Catalog</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&amp;family=Caveat:wght@400;500;600;700&amp;display=optional"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <style type="text/tailwindcss">
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Shared search bar behavior for all pages */
+        .search-container #search-input,
+        .search-container #search-input:hover,
+        .search-container #search-input:focus {
+            border-width: 1.5px;              /* EXACT same thickness always */
+            border-color: #e5e7eb;            /* default gray-200 */
+            outline: none;
+            box-shadow: none;                 /* kill any focus ring from Tailwind/forms */
+            transition: border-color 150ms ease;
+        }
+
+        .search-container #search-dropdown {
+            border-width: 1.5px;
+            border-color: #e5e7eb;            /* default gray-200 */
+        }
+
+        /* Hover (only when not focused): lighter blue */
+        .search-container:hover #search-input:not(:focus) {
+            border-color: #93c5fd;            /* blue-300 */
+        }
+
+        /* Focus (clicked): deeper blue on bar and results, overrides hover completely */
+        .search-container:focus-within #search-input,
+        .search-container:focus-within #search-input:hover {
+            border-color: #2563eb;            /* deep blue */
+        }
+
+        .search-container:focus-within #search-dropdown {
+            border-color: #2563eb;            /* match deep blue */
+        }
+
+        /* Placeholder text uses heading font, typed text uses body font */
+        .search-container #search-input::placeholder {
+            font-family: 'Caveat', system-ui, sans-serif;
+            font-size: 1.05rem;
+        }
+
+        /* Genre filter buttons: white border on hover and when selected */
+        .genre-filter {
+            border-width: 1px;
+        }
+        
+        /* Hide border by default for unselected "All" button */
+        .genre-filter.border-0 {
+            border-width: 0;
+        }
+        
+        /* Show white border on hover for all filter buttons */
+        .genre-filter:hover {
+            border-width: 1px;
+            border-color: white !important;
+        }
+
+        /* Selected buttons: keep blue background, white border, no color change on hover */
+        .genre-filter.bg-primary:hover {
+            background-color: #3A86FF !important; /* Keep same blue, don't change */
+            border-color: white !important;
+        }
+
+        /* Prevent layout shifts during page navigation */
+        header {
+            min-height: 60px;
+        }
+
+        body {
+            font-display: optional;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#3A86FF",
+                        "secondary": "#FFBE0B",
+                        "background-light": "#F8F9FA",
+                        "background-dark": "#111921",
+                        "text-light": "#212529",
+                        "text-dark": "#f8f9fa",
+                        "border-light": "#DEE2E6",
+                        "border-dark": "#343a40"
+                    },
+                    fontFamily: {
+                        "display": ["'DM Sans'", "system-ui", "sans-serif"],
+                        "heading": ["'Caveat'", "system-ui", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.5rem", "lg": "0.75rem", "xl": "1rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+</head>
+
+<body class="font-display bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark">
+    <div class="relative flex min-h-screen w-full flex-col">
+        <!-- Header will be inserted here -->
+        <div id="header-container"></div>
+        <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+            <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
+                <h1
+                    class="font-heading text-3xl md:text-[2.1rem] font-normal tracking-tight text-text-light dark:text-text-dark">
+                    Explore Our Collection
+                </h1>
+            </div>
+            <div class="sm:hidden mb-6 relative">
+                <label class="relative flex items-center h-12 w-full">
+                    <span
+                        class="material-symbols-outlined absolute left-4 text-gray-500 dark:text-gray-400">search</span>
+                    <input id="search-input-mobile"
+                        class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-full border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-text-light dark:text-text-dark h-full placeholder:text-gray-500 dark:placeholder:text-gray-400 pl-10 pr-4 text-sm focus:outline-none focus:border-2 focus:border-blue-500 dark:focus:border-blue-500 transition-all duration-300"
+                        placeholder="Search by title or author..." value="" autocomplete="off" />
+                </label>
+                <div id="search-dropdown-mobile"
+                    class="hidden absolute top-full mt-2 w-full bg-white dark:bg-gray-800 border-2 border-blue-500 rounded-lg shadow-xl overflow-hidden z-[100]">
+                    <!-- Autocomplete results will be inserted here -->
+                </div>
+            </div>
+            <div id="genre-filters" class="flex flex-wrap gap-2 mb-8">
+                <!-- Genre filters will be dynamically loaded here -->
+            </div>
+            <div id="books-grid" class="grid grid-cols-5 gap-6 md:gap-8">
+                <div class="col-span-5 text-center py-8">Loading books...</div>
+            </div>
+            <div id="pagination" class="mt-12 flex items-center justify-center">
+                <!-- Pagination will be added here -->
+            </div>
+        </main>
+        <footer class="mt-auto border-t border-border-light dark:border-border-dark bg-white dark:bg-gray-900">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                    <p class="text-sm text-gray-600 dark:text-gray-400">© 2024 Library Management. All Rights Reserved.
+                    </p>
+                </div>
+            </div>
+        </footer>
+        <!-- Chat widget will be inserted here -->
+        <div id="chat-widget-container"></div>
+    </div>
+    <script type="module">
+        import { fetchBooks, getBookCount, getTopGenres, getBookCoverUrl, formatAuthors, autocompleteSearch } from './src/services/api.js';
+        import { renderHeader, initHeader } from './src/components/header.js';
+        import { renderChatWidget, initChatWidget } from './src/components/chat-widget.js';
+        import { getLikedBooks, isBookLiked, toggleLike, removeFromLiked } from './src/services/user-books.js';
+
+        // Initialize header
+        document.getElementById('header-container').innerHTML = renderHeader();
+        initHeader();
+
+        // Initialize chat widget
+        document.getElementById('chat-widget-container').innerHTML = renderChatWidget();
+        initChatWidget();
+
+        // Initialize mobile autocomplete
+        initMobileAutocomplete();
+
+        let currentPage = 0;
+        let currentGenre = null;
+        let totalBooks = 0;
+        let totalPages = 0;
+        const pageSize = 25; // 5 rows x 5 columns
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function renderBookCard(book, index = 0) {
+            const coverUrl = getBookCoverUrl(book);
+            const authors = formatAuthors(book);
+            // First 6 images (first row) should load with high priority
+            const fetchPriority = index < 6 ? 'high' : 'auto';
+            const loading = index < 6 ? 'eager' : 'lazy';
+            const isLiked = isBookLiked(book.id);
+            const favoriteIconStyle = isLiked ? "font-variation-settings: 'FILL' 1, 'wght' 700; color: #3A86FF;" : "";
+
+            return `
+        <div class="group flex flex-col gap-3" data-book-id="${book.id}">
+            <a href="book-details.html?id=${book.id}" class="relative w-full overflow-hidden aspect-[3/4] rounded-lg shadow-md transition-transform duration-300 group-hover:scale-105 bg-gray-200 dark:bg-gray-700">
+                <div class="absolute inset-0 flex items-center justify-center bg-gray-200 dark:bg-gray-700 animate-pulse z-0">
+                    <div class="w-8 h-8 border-4 border-gray-300 dark:border-gray-600 border-t-primary rounded-full animate-spin"></div>
+                </div>
+                <img 
+                    src="${coverUrl}" 
+                    alt="${escapeHtml(book.title)} cover" 
+                    class="w-full h-full object-cover relative z-10"
+                    loading="${loading}"
+                    fetchpriority="${fetchPriority}"
+                    decoding="async"
+                    onload="this.previousElementSibling.style.display='none';"
+                    onerror="this.style.display='none'; this.previousElementSibling.innerHTML='<div class=\\'w-full h-full flex items-center justify-center text-gray-400 text-xs\\'>No Image</div>'; this.previousElementSibling.style.display='flex';"
+                />
+                <button aria-label="Add to My Books" class="absolute top-2 right-2 z-20 flex items-center justify-center size-8 rounded-full bg-black/30 backdrop-blur-sm text-white hover:bg-primary/80 transition-colors" onclick="event.preventDefault(); toggleFavorite(${book.id})">
+                    <span class="material-symbols-outlined text-base" style="${favoriteIconStyle}">favorite</span>
+                </button>
+            </a>
+            <div>
+                <p class="text-base font-medium leading-tight truncate">${escapeHtml(book.title)}</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400 line-clamp-2" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis;">${escapeHtml(authors)}</p>
+            </div>
+        </div>
+    `;
+        }
+
+        async function loadBooks(genre = null, page = 0) {
+            const grid = document.getElementById('books-grid');
+            const pagination = document.getElementById('pagination');
+            if (!grid) return;
+
+            try {
+                // Show loading state without clearing pagination immediately
+                const loadingHtml = '<div class="col-span-5 text-center py-8">Loading books...</div>';
+                grid.innerHTML = loadingHtml;
+
+                // Fetch total count and books in parallel
+                const [count, books] = await Promise.all([
+                    getBookCount({ genre: genre }),
+                    fetchBooks({
+                        skip: page * pageSize,
+                        limit: pageSize,
+                        genre: genre,
+                    })
+                ]);
+
+                totalBooks = count;
+                totalPages = Math.ceil(totalBooks / pageSize);
+
+                if (books.length === 0) {
+                    grid.innerHTML = '<div class="col-span-5 text-center py-8 text-gray-500 dark:text-gray-400">No books found.</div>';
+                    if (pagination) {
+                        renderPagination(page);
+                    }
+                    return;
+                }
+
+                // Store books globally for toggleFavorite function
+                window.currentBooks = books;
+
+                // Render books efficiently
+                grid.innerHTML = books.map((book, index) => renderBookCard(book, index)).join('');
+
+                // Update pagination
+                if (pagination) {
+                    renderPagination(page);
+                }
+            } catch (error) {
+                console.error('Error loading books:', error);
+                grid.innerHTML = `<div class="col-span-5 text-center py-8 text-red-500">Error loading books: ${error.message}<br><small>Make sure the backend is running on http://localhost:8000</small></div>`;
+                if (pagination) {
+                    pagination.innerHTML = '';
+                }
+            }
+        }
+
+        function renderPagination(currentPage) {
+            const pagination = document.getElementById('pagination');
+            if (!pagination) return;
+
+            if (totalPages === 0) {
+                pagination.innerHTML = '';
+                return;
+            }
+
+            const hasPrevious = currentPage > 0;
+            const hasNext = currentPage < totalPages - 1;
+            const currentPageNum = currentPage + 1; // 1-based for display
+
+            const pages = [];
+
+            // Smart pagination logic:
+            // - Always show first 3 pages (if they exist)
+            // - Show current page if beyond page 3
+            // - Show last page
+            // - Add ellipsis between gaps
+
+            // Add first 3 pages
+            for (let i = 1; i <= Math.min(3, totalPages); i++) {
+                pages.push(i);
+            }
+
+            // If current page is beyond the first 3 pages
+            if (currentPageNum > 3) {
+                // Add ellipsis if there's a gap between page 3 and current page
+                if (currentPageNum > 4) {
+                    pages.push('ellipsis1');
+                }
+
+                // Add current page if it's not the last page
+                if (currentPageNum < totalPages) {
+                    pages.push(currentPageNum);
+                }
+            }
+
+            // Add ellipsis before last page if needed
+            if (totalPages > 3) {
+                const lastInPages = pages[pages.length - 1];
+                const lastPageNum = typeof lastInPages === 'number' ? lastInPages : currentPageNum;
+
+                // Add ellipsis if there's a gap between last shown page and total pages
+                if (lastPageNum < totalPages - 1) {
+                    pages.push('ellipsis2');
+                }
+
+                // Add last page if not already included
+                if (!pages.includes(totalPages)) {
+                    pages.push(totalPages);
+                }
+            }
+
+            // Build HTML
+            let html = '<nav aria-label="Pagination" class="flex items-center gap-2">';
+
+            // Previous arrow button
+            html += `
+        <a 
+            onclick="goToPage(${currentPage - 1}); return false;" 
+            ${!hasPrevious ? 'aria-disabled="true" tabindex="-1"' : 'href="#"'}
+            class="inline-flex items-center justify-center size-9 rounded-full text-sm font-medium border border-border-light dark:border-border-dark transition-colors ${hasPrevious ? 'hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer' : 'opacity-50 cursor-not-allowed pointer-events-none'}"
+            aria-label="Previous page"
+        >
+            <span class="material-symbols-outlined text-base">chevron_left</span>
+        </a>
+    `;
+
+            // Page numbers
+            pages.forEach((page) => {
+                if (typeof page === 'string' && page.startsWith('ellipsis')) {
+                    html += `<span class="inline-flex items-center justify-center size-9 text-sm font-medium">...</span>`;
+                } else {
+                    const isActive = page === currentPageNum;
+                    html += `
+                <a 
+                    onclick="goToPage(${page - 1}); return false;" 
+                    href="#"
+                    class="inline-flex items-center justify-center size-9 rounded-full text-sm font-medium border border-border-light dark:border-border-dark transition-colors ${isActive ? 'bg-primary text-white border-primary' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}"
+                >
+                    ${page}
+                </a>
+            `;
+                }
+            });
+
+            // Next arrow button
+            html += `
+        <a 
+            onclick="goToPage(${currentPage + 1}); return false;" 
+            ${!hasNext ? 'aria-disabled="true" tabindex="-1"' : 'href="#"'}
+            class="inline-flex items-center justify-center size-9 rounded-full text-sm font-medium border border-border-light dark:border-border-dark transition-colors ${hasNext ? 'hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer' : 'opacity-50 cursor-not-allowed pointer-events-none'}"
+            aria-label="Next page"
+        >
+            <span class="material-symbols-outlined text-base">chevron_right</span>
+        </a>
+    `;
+
+            html += '</nav>';
+            pagination.innerHTML = html;
+        }
+
+        function goToPage(page) {
+            if (page < 0 || page >= totalPages) return;
+            currentPage = page;
+            // Scroll to top immediately (without animation) for faster response
+            const grid = document.getElementById('books-grid');
+            if (grid) {
+                grid.scrollIntoView({ behavior: 'auto', block: 'start' });
+                // Also scroll window to top for better UX
+                window.scrollTo({ top: 0, behavior: 'auto' });
+            }
+            loadBooks(currentGenre, currentPage);
+        }
+
+        async function loadGenreFilters() {
+            const container = document.getElementById('genre-filters');
+            if (!container) return;
+
+            try {
+                const topGenres = await getTopGenres(10);
+
+                // Add "All" button first
+                let html = `
+            <button 
+                class="genre-filter font-heading flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full px-4 text-lg font-medium border ${currentGenre === null ? 'bg-primary text-white border-0' : 'bg-white dark:bg-gray-800 border-0'} transition-colors" 
+                data-genre=""
+                onclick="handleGenreFilter(null)"
+            >
+                All
+            </button>
+        `;
+
+                // Add top 10 genres
+                topGenres.forEach(({ genre, count }) => {
+                    html += `
+                <button 
+                    class="genre-filter font-heading flex h-9 shrink-0 items-center justify-center gap-x-2 rounded-full px-4 text-lg font-medium border ${currentGenre === genre ? 'bg-primary text-white border-white' : 'bg-white dark:bg-gray-800 border-border-light dark:border-border-dark'} transition-colors" 
+                    data-genre="${escapeHtml(genre)}"
+                    onclick="handleGenreFilter('${escapeHtml(genre)}')"
+                >
+                    ${escapeHtml(genre)}
+                </button>
+            `;
+                });
+
+                container.innerHTML = html;
+            } catch (error) {
+                console.error('Error loading genres:', error);
+                container.innerHTML = '<p class="text-red-500 text-sm">Error loading genres</p>';
+            }
+        }
+
+        function handleGenreFilter(genre) {
+            // Convert empty string to null for "All"
+            currentGenre = genre === '' || genre === null ? null : genre;
+            currentPage = 0;
+            loadBooks(currentGenre, currentPage);
+
+            // Update active button
+            document.querySelectorAll('.genre-filter').forEach(btn => {
+                const btnGenre = btn.dataset.genre || '';
+                const isActive = (btnGenre === '' && currentGenre === null) || (btnGenre === genre);
+                if (isActive) {
+                    btn.classList.remove('bg-white', 'dark:bg-gray-800', 'border');
+                    btn.classList.add('bg-primary', 'text-white');
+                } else {
+                    btn.classList.remove('bg-primary', 'text-white');
+                    btn.classList.add('bg-white', 'dark:bg-gray-800', 'border');
+                }
+            });
+        }
+
+        function handleSearch() {
+            const searchInput = document.getElementById('search-input') || document.getElementById('search-input-mobile');
+            if (!searchInput) return;
+
+            const query = searchInput.value.trim();
+            if (query.length < 2) {
+                loadBooks(currentGenre, currentPage);
+                return;
+            }
+
+            // Use search endpoint
+            window.location.href = `search.html?q=${encodeURIComponent(query)}`;
+        }
+
+        function initMobileAutocomplete() {
+            const searchInput = document.getElementById('search-input-mobile');
+            const dropdown = document.getElementById('search-dropdown-mobile');
+
+            if (!searchInput || !dropdown) return;
+
+            let debounceTimer = null;
+            let currentResults = [];
+            let selectedIndex = -1;
+
+            // Render dropdown results
+            function renderResults(books) {
+                if (!books || books.length === 0) {
+                    dropdown.classList.add('hidden');
+                    return;
+                }
+
+                // Limit to 5 results
+                const limitedBooks = books.slice(0, 5);
+
+                currentResults = limitedBooks;
+                selectedIndex = -1;
+
+                const html = limitedBooks.map((book, index) => {
+                    const coverUrl = getBookCoverUrl(book);
+                    const authors = formatAuthors(book);
+
+                    return `
+                        <a href="book-details.html?id=${book.id}" 
+                           class="autocomplete-item flex items-center gap-2 py-2 px-3 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer border-b border-border-light dark:border-border-dark last:border-b-0"
+                           data-index="${index}">
+                            <img src="${coverUrl}" 
+                                 alt="${escapeHtml(book.title)}" 
+                                 class="w-10 h-14 object-cover rounded shadow-sm flex-shrink-0"
+                                 onerror="this.style.display='none'"/>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-text-light dark:text-text-dark truncate">${escapeHtml(book.title)}</p>
+                                <p class="text-xs text-gray-600 dark:text-gray-400 truncate">${escapeHtml(authors)}</p>
+                            </div>
+                        </a>
+                    `;
+                }).join('');
+
+                dropdown.innerHTML = html;
+                dropdown.classList.remove('hidden');
+            }
+
+            // Highlight selected item
+            function highlightItem(index) {
+                const items = dropdown.querySelectorAll('.autocomplete-item');
+                items.forEach((item, i) => {
+                    if (i === index) {
+                        item.classList.add('bg-gray-100', 'dark:bg-gray-700');
+                    } else {
+                        item.classList.remove('bg-gray-100', 'dark:bg-gray-700');
+                    }
+                });
+            }
+
+            // Handle search input
+            searchInput.addEventListener('input', (e) => {
+                const query = e.target.value.trim();
+
+                // Clear previous timer
+                if (debounceTimer) {
+                    clearTimeout(debounceTimer);
+                }
+
+                // Hide dropdown if query is too short
+                if (query.length < 2) {
+                    dropdown.classList.add('hidden');
+                    return;
+                }
+
+                // Debounce search (300ms delay)
+                debounceTimer = setTimeout(async () => {
+                    try {
+                        const results = await autocompleteSearch(query);
+                        renderResults(results);
+                    } catch (error) {
+                        console.error('Autocomplete search error:', error);
+                        dropdown.classList.add('hidden');
+                    }
+                }, 300);
+            });
+
+            // Handle keyboard navigation
+            searchInput.addEventListener('keydown', (e) => {
+                const items = dropdown.querySelectorAll('.autocomplete-item');
+
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    selectedIndex = Math.min(selectedIndex + 1, items.length - 1);
+                    highlightItem(selectedIndex);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    selectedIndex = Math.max(selectedIndex - 1, -1);
+                    highlightItem(selectedIndex);
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (selectedIndex >= 0 && items[selectedIndex]) {
+                        items[selectedIndex].click();
+                    }
+                } else if (e.key === 'Escape') {
+                    dropdown.classList.add('hidden');
+                    selectedIndex = -1;
+                }
+            });
+
+            // Handle focus
+            searchInput.addEventListener('focus', () => {
+                if (currentResults.length > 0) {
+                    dropdown.classList.remove('hidden');
+                }
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', (e) => {
+                if (!searchInput.contains(e.target) && !dropdown.contains(e.target)) {
+                    dropdown.classList.add('hidden');
+                    selectedIndex = -1;
+                }
+            });
+        }
+
+        // Functions are now imported from user-books.js module above
+
+        function toggleFavorite(bookId) {
+            // Find the book in the current page's books
+            const allBooks = Array.from(document.querySelectorAll('#books-grid > div[data-book-id]'));
+            const bookElement = allBooks.find(el => el.getAttribute('data-book-id') == bookId);
+            
+            if (!bookElement) {
+                console.error('Book not found:', bookId);
+                return;
+            }
+
+            // Get book data from the element or fetch it
+            const book = window.currentBooks?.find(b => b.id === parseInt(bookId));
+            
+            if (!book) {
+                console.error('Book data not found:', bookId);
+                return;
+            }
+
+            toggleLike(book);
+            
+            // Update button visual
+            const favoriteBtn = bookElement.querySelector('button[aria-label="Add to My Books"]');
+            if (favoriteBtn) {
+                const icon = favoriteBtn.querySelector('.material-symbols-outlined');
+                if (icon) {
+                    if (isBookLiked(bookId)) {
+                        icon.style.fontVariationSettings = "'FILL' 1, 'wght' 700";
+                        icon.style.color = '#3A86FF';
+                    } else {
+                        icon.style.fontVariationSettings = "'FILL' 0, 'wght' 400";
+                    }
+                }
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check for URL params
+            const urlParams = new URLSearchParams(window.location.search);
+            const searchQuery = urlParams.get('search');
+            if (searchQuery) {
+                document.getElementById('search-input')?.setAttribute('value', searchQuery);
+                document.getElementById('search-input-mobile')?.setAttribute('value', searchQuery);
+            }
+
+            // Load genre filters first
+            await loadGenreFilters();
+
+            // Then load books
+            loadBooks(currentGenre, currentPage);
+
+            // Set up search
+            ['search-input', 'search-input-mobile'].forEach(id => {
+                const input = document.getElementById(id);
+                if (input) {
+                    input.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') {
+                            handleSearch();
+                        }
+                    });
+                }
+            });
+        });
+
+        // Export functions for global access
+        window.goToPage = goToPage;
+        window.handleGenreFilter = handleGenreFilter;
+        window.toggleFavorite = toggleFavorite;
+    </script>
+</body>
+
+</html>

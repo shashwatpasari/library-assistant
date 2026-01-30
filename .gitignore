@@ -1,0 +1,37 @@
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+.env
+
+# Node
+node_modules/
+dist/
+npm-debug.log*
+
+# Database
+*.db
+*.sqlite3
+postgres_data/
+
+# OS
+.DS_Store
+.idea/
+.vscode/
+
+# Docker
+docker-compose.override.yml
+
+# Backend Scripts
+# Ignore everything in scripts
+backend/scripts/*
+# But keep these specific files
+!backend/scripts/extract_goodreads_list.py
+!backend/scripts/import_goodreads_csv.py
+!backend/scripts/migrate_to_postgres.py
+!backend/scripts/goodreads_list_books_sample.csv
+!backend/scripts/__init__.py

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>LibraryHub - Welcome</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#197fe6",
+              "background-light": "#f6f7f8",
+              "background-dark": "#111921",
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-[#111418] dark:text-gray-200">
+<div class="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-gray-200 dark:border-gray-700 px-4 sm:px-6 lg:px-10 py-3 bg-white dark:bg-background-dark/80 sticky top-0 z-10 backdrop-blur-sm">
+<div class="flex items-center gap-8">
+<div class="flex items-center gap-4 text-primary">
+<div class="size-6">
+<svg fill="currentColor" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M24 45.8096C19.6865 45.8096 15.4698 44.5305 11.8832 42.134C8.29667 39.7376 5.50128 36.3314 3.85056 32.3462C2.19985 28.361 1.76794 23.9758 2.60947 19.7452C3.451 15.5145 5.52816 11.6284 8.57829 8.5783C11.6284 5.52817 15.5145 3.45101 19.7452 2.60948C23.9758 1.76795 28.361 2.19986 32.3462 3.85057C36.3314 5.50129 39.7376 8.29668 42.134 11.8833C44.5305 15.4698 45.8096 19.6865 45.8096 24L24 24L24 45.8096Z"></path>
+</svg>
+</div>
+<h2 class="text-xl font-bold leading-tight tracking-[-0.015em] text-[#111418] dark:text-white">LibraryHub</h2>
+</div>
+<label class="hidden md:flex flex-col min-w-40 !h-10 max-w-64">
+<div class="flex w-full flex-1 items-stretch rounded-lg h-full">
+<div class="text-[#637588] dark:text-gray-400 flex border-none bg-gray-100 dark:bg-gray-800 items-center justify-center pl-4 rounded-l-lg border-r-0">
+<span class="material-symbols-outlined !text-xl">search</span>
+</div>
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-r-lg text-[#111418] dark:text-gray-200 focus:outline-0 focus:ring-0 border-none bg-gray-100 dark:bg-gray-800 focus:border-none h-full placeholder:text-[#637588] dark:placeholder:text-gray-500 px-4 pl-2 text-base font-normal leading-normal" placeholder="Search" value=""/>
+</div>
+</label>
+</div>
+<div class="flex flex-1 justify-end gap-8">
+<div class="hidden lg:flex items-center gap-9">
+<a class="text-[#111418] dark:text-gray-300 text-sm font-medium leading-normal" href="#">Home</a>
+<a class="text-[#111418] dark:text-gray-300 text-sm font-medium leading-normal" href="#">Catalog</a>
+<a class="text-[#111418] dark:text-gray-300 text-sm font-medium leading-normal" href="#">My Books</a>
+</div>
+<div class="flex items-center gap-3">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="User avatar image" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAwUngiqPK_XZbOPravytrQyd_nWqUyEXAqYwuROygU0ucnOweckCWz8J4JU_FkosE5Jm0qBnc-UQYCVaJuqE__-LRjtzT-ZW9s0At9zBxhKAV7NiK7lWUIvoj9K9NbVLKx8BVs3rrU7AlZjguorI7GybD_ewKC3UlmQTeJtcPfiWEGHulvHwOyly4HfKKwjTnHcNYpiuQQyw9tXQN4ydE0tPKC1Q2JLloEy3yoyB_y3VMkO5PMYG91_soT2NUpM4QY8QlbVr7F4Bzg");'></div>
+</div>
+</div>
+</header>
+<main class="w-full max-w-screen-2xl mx-auto p-4 sm:p-6 lg:p-8">
+<section class="mb-12">
+<div class="bg-primary/10 dark:bg-primary/20 rounded-xl p-8 lg:p-12 text-center">
+<h1 class="text-4xl lg:text-5xl font-black leading-tight tracking-[-0.033em] text-primary dark:text-white mb-4">Welcome to LibraryHub</h1>
+<p class="text-lg text-[#111418] dark:text-gray-300 max-w-3xl mx-auto">Your gateway to a world of knowledge and adventure. Discover new stories, revisit old classics, and connect with a community of readers.</p>
+</div>
+</section>
+<section>
+<h2 class="text-3xl font-bold leading-tight tracking-[-0.015em] text-[#111418] dark:text-white mb-6">Available Now</h2>
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+<div class="flex flex-col gap-3 group">
+<div class="w-full aspect-[2/3] rounded-lg overflow-hidden shadow-md group-hover:shadow-xl transition-shadow">
+<div class="w-full h-full bg-center bg-no-repeat bg-cover" data-alt="Book cover for The Midnight Library" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuC-Ff_mwgCxH42qXjHRD3IUUk7DnLki5mbqZKZgXbwwQZ2wND-1thRoIWnADdFFhh9qGoHjRb7-4B19e-XKlgoKyhAMVO9qt-x2Px3UUNozTrqXlOoWsm7HiKGG-U26P2q8kgROMv0rCraAy8odlGu53rkl0E7LFuSlIl2EKxk8tXF3FEBUXvcUbcvV2LvXx7THdRH_KdhjjKyjrRaHfxPlj7Qq6xwlKhRLJvLiY22BJMCnG4KTOkNS_j7l1Vn6KVC71HBofVOzQwxX");'></div>
+</div>
+<div>
+<h3 class="font-bold text-lg leading-tight text-[#111418] dark:text-white">The Midnight Library</h3>
+<p class="text-sm text-[#637588] dark:text-gray-400">Matt Haig</p>
+</div>
+</div>
+<div class="flex flex-col gap-3 group">
+<div class="w-full aspect-[2/3] rounded-lg overflow-hidden shadow-md group-hover:shadow-xl transition-shadow">
+<div class="w-full h-full bg-center bg-no-repeat bg-cover" data-alt="Book cover for The Four Winds" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAZgVRq4_W2pd-BRWAemgaePeBS8xZ41O0YbzG18M8Oi5LEb7ezGHJkbnJKnFCcrfqF3HQAkoJqPSqWAho1gGOP2Lr215U8uYUkUkOp4uk5IF6tRUFqEdPzVNhmbDNyC0EFWSWLfSJhov5yp-rvvP-aQPttje9sddIBd8GWnCRff6qG7V5mAf5X9SjFJD80PkpXnmhJ0dghgvX4zJ8AJGApUa-hRnyEMFq-4DrJWc0XfRnqgkD7gg6Jyer7zd6-jG_NGVk55bYpNOAj");'></div>
+</div>
+<div>
+<h3 class="font-bold text-lg leading-tight text-[#111418] dark:text-white">The Four Winds</h3>
+<p class="text-sm text-[#637588] dark:text-gray-400">Kristin Hannah</p>
+</div>
+</div>
+<div class="flex flex-col gap-3 group">
+<div class="w-full aspect-[2/3] rounded-lg overflow-hidden shadow-md group-hover:shadow-xl transition-shadow">
+<div class="w-full h-full bg-center bg-no-repeat bg-cover" data-alt="Book cover for Klara and the Sun" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAJQMjOihe3vXYzwSRAruGTEYitRwpuxePdHZbn-mK17UJjE9EXuja2CodVnLlsGYJ9PX7YYKa0GW9SPZYVlzeqyOTU64ImOJc_F3z7zR9R8D7G2nI2y87Vp7CvzFj9ywAG4JRvBM03THPQvjlkDyQ68e5OkaBLvFuAGQ3VI7z3iKuN7KpJvXn_8waycF8rwqfUPoN4kwl-6JP1v_yFgUN1DoQ17Xk8vblfgrF7kgoS_m3xBA7uHhYQqlBKCA0JnvzeVtd7oezOtEsU");'></div>
+</div>
+<div>
+<h3 class="font-bold text-lg leading-tight text-[#111418] dark:text-white">Klara and the Sun</h3>
+<p class="text-sm text-[#637588] dark:text-gray-400">Kazuo Ishiguro</p>
+</div>
+</div>
+<div class="flex flex-col gap-3 group">
+<div class="w-full aspect-[2/3] rounded-lg overflow-hidden shadow-md group-hover:shadow-xl transition-shadow">
+<div class="w-full h-full bg-center bg-no-repeat bg-cover" data-alt="Book cover for Project Hail Mary" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDJxN40k4kSuB90pRnxHag7haCK0k872wd_PRGXg02LXBM7R2aVPu0ZXt9aPPxECnzH9wMllbmdC7ptDfWKrR8mK5l5asMfHuk5QsvG76UJlwktaLb_9UulBqWwXthSs-tx4WY-h6u4n-s3E4oQ5QSUd8LEo17VgLQGITvkQ8ho2kMsoA7RCUnW-1DpcsNVSXyZAWm9J113XqxrXSXit7W2Eo8pQHZsIp0uDOc75gS-k7alQi6YrcLaMBf8xb9o8NjF8cyrXm1jwyST");'></div>
+</div>
+<div>
+<h3 class="font-bold text-lg leading-tight text-[#111418] dark:text-white">Project Hail Mary</h3>
+<p class="text-sm text-[#637588] dark:text-gray-400">Andy Weir</p>
+</div>
+</div>
+<div class="flex flex-col gap-3 group">
+<div class="w-full aspect-[2/3] rounded-lg overflow-hidden shadow-md group-hover:shadow-xl transition-shadow">
+<div class="w-full h-full bg-center bg-no-repeat bg-cover" data-alt="Book cover for The Lincoln Highway" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuADGTsDDaRuDYg9bLXArXRdWF2fyOr1EqOmbUfka-K10Np-dJGsShiVNQ0_qSuKNY95zlpoGztIVulJdPydSdMYhkVfGwVi9jGroLfye68LY4NCuF2ykKeyBjsXnC3y3eG3iosZppQtM2-RqRT0OhFl1SdqccLyNpuGd2L4gBYBlg-LJHkGGyhziD9Jw4uaYzPRp4qbZ9BsOsmQSTrQ_uqM9Rp-orq-vXMR9GL1WoCs1gmwHZUcI4m31maqT3tTTmomWWpM4vyAyxl0");'></div>
+</div>
+<div>
+<h3 class="font-bold text-lg leading-tight text-[#111418] dark:text-white">The Lincoln Highway</h3>
+<p class="text-sm text-[#637588] dark:text-gray-400">Amor Towles</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<div class="fixed bottom-4 right-4 z-20">
+<div class="w-80 h-[28rem] bg-white dark:bg-gray-900/80 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-gray-800 shadow-xl flex flex-col">
+<div class="p-4 border-b border-gray-200 dark:border-gray-800 flex-shrink-0">
+<h3 class="font-bold text-lg text-[#111418] dark:text-white">Ask an Assistant</h3>
+<p class="text-sm text-[#637588] dark:text-gray-400">Powered by RAG AI</p>
+</div>
+<div class="flex-1 p-4 overflow-y-auto space-y-4">
+<div class="flex justify-start">
+<div class="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg max-w-xs">
+<p class="text-sm text-[#111418] dark:text-gray-200">Hello! I'm your AI assistant. How can I help you today?</p>
+</div>
+</div>
+</div>
+<div class="p-4 border-t border-gray-200 dark:border-gray-800 flex-shrink-0 bg-white dark:bg-gray-900/80 rounded-b-xl">
+<div class="flex items-center gap-2">
+<input class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#111418] dark:text-gray-200 focus:outline-0 focus:ring-2 focus:ring-primary border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 focus:border-primary h-11 placeholder:text-[#637588] dark:placeholder:text-gray-500 px-4 text-sm font-normal leading-normal" placeholder="Ask a question..."/>
+<button class="flex shrink-0 max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 w-11 bg-primary text-white hover:bg-primary/90 transition-colors">
+<span class="material-symbols-outlined !text-xl">send</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body></html>

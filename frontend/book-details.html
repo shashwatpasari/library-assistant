@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Book Details - LibraryHub</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&amp;family=Caveat:wght@400;500;600;700&amp;display=optional"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#3A86FF",
+                        "secondary": "#FFBE0B",
+                        "background-light": "#F8F9FA",
+                        "background-dark": "#111921",
+                        "text-light": "#212529",
+                        "text-dark": "#f8f9fa",
+                        "border-light": "#DEE2E6",
+                        "border-dark": "#343a40"
+                    },
+                    fontFamily: {
+                        "display": ["'DM Sans'", "system-ui", "sans-serif"],
+                        "heading": ["'Caveat'", "system-ui", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.5rem", "lg": "0.75rem", "xl": "1rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            font-size: 24px;
+        }
+
+        /* Prevent layout shifts during page navigation */
+        header {
+            min-height: 60px;
+        }
+
+        body {
+            font-display: optional;
+        }
+    </style>
+</head>
+
+<body class="font-display bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark">
+    <div class="relative flex min-h-screen w-full flex-col">
+        <!-- Header will be inserted here -->
+        <div id="header-container"></div>
+        <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+            <!-- Breadcrumbs -->
+            <nav class="mb-6 text-sm text-[#637588] dark:text-gray-400">
+                <a href="index.html" class="hover:text-primary">Home</a>
+                <span class="mx-2">/</span>
+                <a href="catalog.html" class="hover:text-primary">Search</a>
+                <span class="mx-2">/</span>
+                <span id="breadcrumb-title" class="text-[#111418] dark:text-gray-300">Loading...</span>
+            </nav>
+
+            <!-- Main Content Layout -->
+            <div class="flex flex-col lg:flex-row gap-8 mb-12">
+                <!-- Left: Book Cover and Details -->
+                <div class="flex-1">
+                    <div class="flex flex-col lg:flex-row gap-8">
+                        <!-- Book Cover -->
+                        <div class="flex-shrink-0">
+                            <div id="book-cover"
+                                class="w-full max-w-xs mx-auto lg:mx-0 aspect-[2/3] rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-700"
+                                style="box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(0, 0, 0, 0.1);">
+                                <div class="w-full h-full flex items-center justify-center text-gray-400">Loading...
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Book Information -->
+                        <div class="flex-1">
+                            <div id="book-info">
+                                <h1 id="book-title"
+                                    class="font-heading text-4xl font-normal mb-3 text-[#f9fafb] dark:text-white">
+                                    Loading...</h1>
+                                <p id="book-authors" class="text-xl text-[#637588] dark:text-gray-400 mb-4"></p>
+                                <!-- Rating with Stars - React Component -->
+                                <div id="rating-stars-container" class="mb-4">
+                                    <!-- React StarRating component will be mounted here -->
+                                </div>
+                                <style>
+                                </style>
+                                <!-- Genre Tags -->
+                                <div id="book-genres" class="flex flex-wrap gap-2 mb-6">
+                                    <!-- Genre tags will be inserted here -->
+                                </div>
+                                <!-- Book Details Grid -->
+                                <div class="grid grid-cols-2 gap-4 mb-6 text-sm">
+                                    <div>
+                                        <p class="text-[#637588] dark:text-gray-400 mb-1">Page Count</p>
+                                        <p id="book-pages" class="font-medium text-[#111418] dark:text-white">-</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-[#637588] dark:text-gray-400 mb-1">Language</p>
+                                        <p id="book-language" class="font-medium text-[#111418] dark:text-white">-</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-[#637588] dark:text-gray-400 mb-1">ISBN</p>
+                                        <p id="book-isbn" class="font-medium text-[#111418] dark:text-white">-</p>
+                                    </div>
+                                </div>
+                                <!-- Publisher Section -->
+                                <div class="mb-6 text-sm">
+                                    <p class="text-[#637588] dark:text-gray-400 mb-1">Publisher</p>
+                                    <p id="book-publisher" class="font-medium text-[#111418] dark:text-white mb-1">-</p>
+                                    <p id="book-date" class="text-[#637588] dark:text-gray-400 text-xs">-</p>
+                                </div>
+                                <!-- Synopsis -->
+                                <div id="book-synopsis" class="mb-6">
+                                    <h3 class="text-lg font-bold text-[#111418] dark:text-white mb-2">Synopsis</h3>
+                                    <div id="synopsis-content"
+                                        class="text-[#111418] dark:text-gray-300 leading-relaxed">
+                                        <p id="synopsis-text"></p>
+                                        <button id="read-more-btn" class="text-primary hover:underline mt-2 hidden">Read
+                                            More</button>
+                                    </div>
+                                </div>
+                                <!-- Action Buttons -->
+                                <div class="flex items-center gap-4">
+                                    <button id="favorite-btn"
+                                        class="px-6 py-3 bg-transparent border-2 border-primary text-primary rounded-lg font-medium hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors shadow-md flex items-center gap-2">
+                                        <span id="favorite-icon"
+                                            class="material-symbols-outlined text-base">favorite</span>
+                                        <span id="favorite-text">Like</span>
+                                    </button>
+                                    <button id="borrow-btn"
+                                        class="px-6 py-3 bg-primary text-white rounded-lg font-medium hover:bg-primary/90 transition-colors shadow-md">
+                                        <span id="borrow-text">Borrow Book</span>
+                                    </button>
+                                    <div id="availability-status" class="flex items-center gap-2">
+                                        <span
+                                            class="material-symbols-outlined text-green-600 dark:text-green-400">check_circle</span>
+                                        <span id="availability-text"
+                                            class="text-sm font-medium text-green-600 dark:text-green-400">Available</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+    </div>
+    </main>
+    <footer class="mt-auto border-t border-border-light dark:border-border-dark bg-white dark:bg-gray-900">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                <p class="text-sm text-gray-600 dark:text-gray-400">© 2024 Library Management. All Rights Reserved.
+                </p>
+            </div>
+        </div>
+    </footer>
+    <!-- Chat widget will be inserted here -->
+    <div id="chat-widget-container"></div>
+    <script type="module">
+        import { getBook, getBookAvailability, getBookCoverUrl, formatAuthors } from './src/services/api.js';
+        import { renderHeader, initHeader } from './src/components/header.js';
+        import { renderChatWidget, initChatWidget } from './src/components/chat-widget.js';
+        import { mountStarRating } from './src/components/star-rating-wrapper.js';
+        import { isBookLiked, isBookBorrowed, toggleLike, toggleBorrow } from './src/services/user-books.js';
+
+        // Initialize header
+        document.getElementById('header-container').innerHTML = renderHeader();
+        initHeader();
+
+        // Chat widget will be initialized after book is loaded
+        let chatWidgetInitialized = false;
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function stripHtml(html) {
+            if (!html) return '';
+            const div = document.createElement('div');
+            div.innerHTML = html;
+            return div.textContent || div.innerText || '';
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            // Try to parse and format the date
+            try {
+                const date = new Date(dateStr);
+                if (!isNaN(date.getTime())) {
+                    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+                }
+                // If it's just a year
+                if (/^\d{4}$/.test(dateStr)) {
+                    return dateStr;
+                }
+                return dateStr;
+            } catch {
+                return dateStr;
+            }
+        }
+
+        function parseGenres(book) {
+            const genres = [];
+            // Try subjects first (semicolon-separated)
+            if (book.subjects) {
+                const subjects = book.subjects.split(';').map(s => s.trim()).filter(s => s);
+                genres.push(...subjects);
+            }
+            // Then try genres (comma-separated)
+            if (book.genres) {
+                // Handle both comma and semicolon separated genres
+                const genreStr = book.genres.replace(/[,;]/g, ','); // Normalize separators to comma
+                const genreList = genreStr.split(',').map(g => g.trim()).filter(g => g);
+                genres.push(...genreList);
+            }
+            // Remove duplicates and return ALL genres
+            return [...new Set(genres)];
+        }
+
+        function truncateText(text, maxLength = 300) {
+            if (!text || text.length <= maxLength) return { text, isTruncated: false };
+            // Find the last space before maxLength to avoid cutting words
+            const truncated = text.substring(0, maxLength);
+            const lastSpace = truncated.lastIndexOf(' ');
+            return {
+                text: lastSpace > 0 ? truncated.substring(0, lastSpace) + '...' : truncated + '...',
+                isTruncated: true
+            };
+        }
+
+
+        let currentBook = null;
+
+        async function loadBookDetails() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const bookId = urlParams.get('id');
+
+            if (!bookId) {
+                document.getElementById('book-info').innerHTML = '<p class="text-red-500">No book ID provided.</p>';
+                return;
+            }
+
+            try {
+                const [book, availability] = await Promise.all([
+                    getBook(bookId),
+                    getBookAvailability(bookId)
+                ]);
+
+                // Update breadcrumb
+                document.getElementById('breadcrumb-title').textContent = book.title || 'Book';
+
+                // Update cover with optimized loading
+                const coverUrl = getBookCoverUrl(book);
+                // Preload the cover image for faster display
+                if (coverUrl && coverUrl !== '/placeholder-book.jpg') {
+                    const preloadLink = document.createElement('link');
+                    preloadLink.rel = 'preload';
+                    preloadLink.as = 'image';
+                    preloadLink.href = coverUrl;
+                    preloadLink.fetchPriority = 'high';
+                    document.head.appendChild(preloadLink);
+                }
+
+                document.getElementById('book-cover').innerHTML = `
+            <div class="absolute inset-0 flex items-center justify-center bg-gray-200 dark:bg-gray-700 animate-pulse">
+                <div class="w-12 h-12 border-4 border-gray-300 dark:border-gray-600 border-t-primary rounded-full animate-spin"></div>
+            </div>
+            <img 
+                src="${escapeHtml(coverUrl)}" 
+                alt="${escapeHtml(book.title)} cover" 
+                class="w-full h-full object-cover relative z-10 rounded-lg"
+                loading="eager"
+                fetchpriority="high"
+                decoding="async"
+                onload="this.previousElementSibling.style.display='none';"
+                onerror="this.style.display='none'; this.previousElementSibling.innerHTML='<div class=\\'w-full h-full flex items-center justify-center text-gray-400 text-sm\\'>No Image Available</div>'; this.previousElementSibling.style.display='flex';"
+            />
+        `;
+
+                // Update title
+                document.getElementById('book-title').textContent = book.title || 'Untitled';
+
+                // Update authors
+                document.getElementById('book-authors').textContent = formatAuthors(book);
+
+                // Update rating with React StarRating component
+                mountStarRating('rating-stars-container', book.rating);
+
+                // Initialize chat widget with book context if not already initialized
+                if (!chatWidgetInitialized) {
+                    const suggestedQuestions = [
+                        'What is the main theme?',
+                        'Summarize the plot.',
+                        'Who is the main character?'
+                    ];
+                    document.getElementById('chat-widget-container').innerHTML = renderChatWidget({
+                        greeting: `Hello! I'm your AI assistant. Ask me anything about "${book.title || 'this book'}".`,
+                        bookTitle: book.title || null,
+                        suggestedQuestions: suggestedQuestions
+                    });
+                    initChatWidget();
+                    chatWidgetInitialized = true;
+                }
+
+                // Update genres - show ALL genres
+                const genres = parseGenres(book);
+                const genresContainer = document.getElementById('book-genres');
+                if (genres.length > 0) {
+                    genresContainer.innerHTML = genres.map(genre =>
+                        `<span class="px-3 py-1 bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary-300 rounded-full text-sm font-medium">${escapeHtml(genre)}</span>`
+                    ).join('');
+                } else {
+                    genresContainer.innerHTML = '<span class="text-[#637588] dark:text-gray-400 text-sm">No genres available</span>';
+                }
+
+                // Update book details
+                document.getElementById('book-pages').textContent = book.pages ? `${book.pages} pages` : '-';
+                document.getElementById('book-language').textContent = book.language || '-';
+                const isbn = book.isbn13 || book.isbn10 || book.isbn || '-';
+                document.getElementById('book-isbn').textContent = isbn;
+
+                // Update publisher section (publisher name and date below it)
+                document.getElementById('book-publisher').textContent = book.publisher || '-';
+                document.getElementById('book-date').textContent = book.date_published ? formatDate(book.date_published) : '-';
+
+                // Update availability
+                const isAvailable = availability.available_copies > 0;
+                const availabilityStatus = document.getElementById('availability-status');
+                const availabilityText = document.getElementById('availability-text');
+                const availabilityIcon = availabilityStatus?.querySelector('.material-symbols-outlined');
+
+                if (isAvailable) {
+                    if (availabilityStatus) availabilityStatus.classList.remove('hidden');
+                    if (availabilityText) {
+                        availabilityText.textContent = 'Available';
+                        availabilityText.className = 'text-sm font-medium text-green-600 dark:text-green-400';
+                    }
+                    if (availabilityIcon) {
+                        availabilityIcon.className = 'material-symbols-outlined text-green-600 dark:text-green-400';
+                        availabilityIcon.textContent = 'check_circle';
+                    }
+                } else {
+                    if (availabilityStatus) availabilityStatus.classList.remove('hidden');
+                    if (availabilityText) {
+                        availabilityText.textContent = 'Unavailable';
+                        availabilityText.className = 'text-sm font-medium text-red-600 dark:text-red-400';
+                    }
+                    if (availabilityIcon) {
+                        availabilityIcon.className = 'material-symbols-outlined text-red-600 dark:text-red-400';
+                        availabilityIcon.textContent = 'cancel';
+                    }
+                }
+
+                // Update synopsis
+                const synopsis = book.synopsis || book.description || 'No synopsis available.';
+                const cleanSynopsis = stripHtml(synopsis);
+                const synopsisResult = truncateText(cleanSynopsis, 300);
+                const synopsisTextEl = document.getElementById('synopsis-text');
+                synopsisTextEl.textContent = synopsisResult.text;
+
+                // Show/hide "Read More" button
+                const readMoreBtn = document.getElementById('read-more-btn');
+                if (synopsisResult.isTruncated) {
+                    readMoreBtn.classList.remove('hidden');
+                    readMoreBtn.onclick = () => {
+                        synopsisTextEl.textContent = cleanSynopsis;
+                        readMoreBtn.classList.add('hidden');
+                    };
+                } else {
+                    readMoreBtn.classList.add('hidden');
+                }
+
+                // Store current book for later use
+                currentBook = book;
+
+                // Update favorite and borrow button states
+                updateFavoriteButton(bookId, book);
+                updateBorrowButton(bookId);
+
+            } catch (error) {
+                console.error('Error loading book:', error);
+                document.getElementById('book-info').innerHTML = `<p class="text-red-500">Error loading book: ${error.message}</p>`;
+            }
+        }
+
+        // Functions are now imported from user-books.js module above
+
+        function updateFavoriteButton(bookId, book) {
+            const favoriteBtn = document.getElementById('favorite-btn');
+            const favoriteIcon = document.getElementById('favorite-icon');
+            const favoriteText = document.getElementById('favorite-text');
+
+            if (isBookLiked(bookId)) {
+                favoriteIcon.textContent = 'favorite';
+                favoriteIcon.style.fontVariationSettings = "'FILL' 1, 'wght' 700";
+                favoriteBtn.classList.add('bg-primary', 'text-white', 'border-primary');
+                favoriteBtn.classList.remove('bg-transparent', 'border-primary', 'text-primary');
+                favoriteText.textContent = 'Liked';
+            } else {
+                favoriteIcon.textContent = 'favorite';
+                favoriteIcon.style.fontVariationSettings = "'FILL' 0, 'wght' 400";
+                favoriteBtn.classList.remove('bg-primary', 'text-white');
+                favoriteBtn.classList.add('bg-transparent', 'border-primary', 'text-primary');
+                favoriteText.textContent = 'Like';
+            }
+        }
+
+        function updateBorrowButton(bookId) {
+            const borrowBtn = document.getElementById('borrow-btn');
+            const borrowText = document.getElementById('borrow-text');
+
+            if (isBookBorrowed(bookId)) {
+                borrowBtn.classList.remove('bg-primary');
+                borrowBtn.classList.add('bg-green-600', 'hover:bg-green-700');
+                borrowText.textContent = 'Borrowed';
+                borrowBtn.disabled = true;
+            } else {
+                borrowBtn.classList.add('bg-primary');
+                borrowBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
+                borrowText.textContent = 'Borrow Book';
+                borrowBtn.disabled = false;
+            }
+        }
+
+        // Favorite button functionality
+        document.getElementById('favorite-btn')?.addEventListener('click', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const bookId = urlParams.get('id');
+
+            if (!bookId || !currentBook) return;
+
+            toggleLike(currentBook);
+            updateFavoriteButton(bookId, currentBook);
+        });
+
+        // Borrow button functionality
+        document.getElementById('borrow-btn')?.addEventListener('click', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const bookId = urlParams.get('id');
+
+            if (!bookId || !currentBook || isBookBorrowed(bookId)) return;
+
+            toggleBorrow(currentBook);
+            updateBorrowButton(bookId);
+        });
+
+        // Initialize
+        loadBookDetails();
+    </script>
+</body>
+
+</html>

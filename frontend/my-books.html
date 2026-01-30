@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>My Books - Library</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&amp;family=Caveat:wght@400;500;600;700&amp;display=optional"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#3A86FF",
+                        "secondary": "#FFBE0B",
+                        "background-light": "#F8F9FA",
+                        "background-dark": "#111921",
+                        "text-light": "#212529",
+                        "text-dark": "#f8f9fa",
+                        "border-light": "#DEE2E6",
+                        "border-dark": "#343a40"
+                    },
+                    fontFamily: {
+                        "display": ["'DM Sans'", "system-ui", "sans-serif"],
+                        "heading": ["'Caveat'", "system-ui", "sans-serif"]
+                    },
+                    borderRadius: { "DEFAULT": "0.5rem", "lg": "0.75rem", "xl": "1rem", "full": "9999px" },
+                },
+            },
+        }
+    </script>
+    <style>
+        /* Shared search bar behavior for all pages */
+        .search-container #search-input,
+        .search-container #search-input:hover,
+        .search-container #search-input:focus {
+            border-width: 1.5px;              /* EXACT same thickness always */
+            border-color: #e5e7eb;            /* default gray-200 */
+            outline: none;
+            box-shadow: none;                 /* kill any focus ring from Tailwind/forms */
+            transition: border-color 150ms ease;
+        }
+
+        .search-container #search-dropdown {
+            border-width: 1.5px;
+            border-color: #e5e7eb;            /* default gray-200 */
+        }
+
+        /* Hover (only when not focused): lighter blue */
+        .search-container:hover #search-input:not(:focus) {
+            border-color: #93c5fd;            /* blue-300 */
+        }
+
+        /* Focus (clicked): deeper blue on bar and results, overrides hover completely */
+        .search-container:focus-within #search-input,
+        .search-container:focus-within #search-input:hover {
+            border-color: #2563eb;            /* deep blue */
+        }
+
+        .search-container:focus-within #search-dropdown {
+            border-color: #2563eb;            /* match deep blue */
+        }
+
+        /* Placeholder text uses heading font, typed text uses body font */
+        .search-container #search-input::placeholder {
+            font-family: 'Caveat', system-ui, sans-serif;
+            font-size: 1.05rem;
+        }
+
+        /* Prevent layout shifts during page navigation */
+        header {
+            min-height: 60px;
+        }
+
+        body {
+            font-display: optional;
+        }
+    </style>
+</head>
+
+<body class="font-display bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark">
+    <div class="relative flex min-h-screen w-full flex-col">
+        <!-- Header will be inserted here -->
+        <div id="header-container"></div>
+        <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+            <div class="flex flex-wrap justify-between gap-3 mb-8">
+                <div class="flex min-w-72 flex-col gap-2">
+                    <h1
+                        class="font-heading text-text-light dark:text-text-dark text-4xl font-normal leading-snug tracking-tight">
+                        My Books</h1>
+                    <p class="text-gray-600 dark:text-gray-400 text-base font-normal leading-normal">Your personal
+                        collection of books you've saved.</p>
+                </div>
+            </div>
+            <!-- Liked Books Section -->
+            <div id="liked-section" class="mb-12">
+                <h2 class="text-2xl font-heading font-medium mb-6 text-text-light dark:text-text-dark">Liked</h2>
+                <div id="liked-books-grid" class="grid grid-cols-5 gap-6 md:gap-8">
+                    <div class="col-span-5 text-center py-8 text-gray-500 dark:text-gray-400">Loading...</div>
+                </div>
+                <div id="liked-pagination" class="mt-12 flex items-center justify-center">
+                    <!-- Pagination will be rendered here -->
+                </div>
+            </div>
+
+            <!-- Borrowed Books Section -->
+            <div id="borrowed-section" class="mb-12">
+                <h2 class="text-2xl font-heading font-medium mb-6 text-text-light dark:text-text-dark">Borrowed</h2>
+                <div id="borrowed-books-grid" class="grid grid-cols-5 gap-6 md:gap-8">
+                    <div class="col-span-5 text-center py-8 text-gray-500 dark:text-gray-400">Loading...</div>
+                </div>
+                <div id="borrowed-pagination" class="mt-12 flex items-center justify-center">
+                    <!-- Pagination will be rendered here -->
+                </div>
+            </div>
+
+            <div id="empty-state" class="hidden flex flex-col px-4 py-16">
+                <div class="flex flex-col items-center gap-6">
+                    <div class="text-primary dark:text-primary/70">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" fill="currentColor"
+                            viewBox="0 0 256 256">
+                            <path
+                                d="M222.8,114.75l-80-80a12,12,0,0,0-17.6,0l-80,80A12,12,0,0,0,36,132H60v76a12,12,0,0,0,12,12H184a12,12,0,0,0,12-12V132h24a12,12,0,0,0,8.8-20.25ZM184,208H140V156a12,12,0,0,0-12-12H128a12,12,0,0,0-12,12v52H72V125.14l-6.8,6.8a12.12,12.12,0,0,0-8.8,11.56H212A12,12,0,0,0,224,132h-.4a12.06,12.06,0,0,0-8.8-11.56l-6.8-6.8Z">
+                            </path>
+                        </svg>
+                    </div>
+                    <div class="flex max-w-[480px] flex-col items-center gap-2">
+                        <p
+                            class="text-text-light dark:text-text-dark text-lg font-bold leading-tight tracking-[-0.015em] max-w-[480px] text-center">
+                            Your Favorite Bookshelf is Waiting</p>
+                        <p
+                            class="text-gray-600 dark:text-gray-400 text-sm font-normal leading-normal max-w-[480px] text-center">
+                            Use the heart icon on any book to add it to your personal collection.</p>
+                    </div>
+                    <button onclick="window.location.href='catalog.html'"
+                        class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors">
+                        <span class="truncate">Start Exploring</span>
+                    </button>
+                </div>
+            </div>
+        </main>
+        <footer class="mt-auto border-t border-border-light dark:border-border-dark bg-white dark:bg-gray-900">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                    <p class="text-sm text-gray-600 dark:text-gray-400">© 2024 Library Management. All Rights Reserved.
+                    </p>
+                </div>
+            </div>
+        </footer>
+        <!-- Chat widget will be inserted here -->
+        <div id="chat-widget-container"></div>
+    </div>
+    <script type="module">
+        import { getBookCoverUrl, formatAuthors } from './src/services/api.js';
+        import { renderHeader, initHeader } from './src/components/header.js';
+        import { renderChatWidget, initChatWidget } from './src/components/chat-widget.js';
+        import { getLikedBooks, getBorrowedBooks, removeFromLiked, removeFromBorrowed } from './src/services/user-books.js';
+
+        // Initialize header
+        document.getElementById('header-container').innerHTML = renderHeader();
+        initHeader();
+
+        // Initialize chat widget
+        document.getElementById('chat-widget-container').innerHTML = renderChatWidget();
+        initChatWidget();
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function renderBookCard(book, type = 'liked') {
+            const coverUrl = getBookCoverUrl(book);
+            const authors = formatAuthors(book);
+            const removeFunction = type === 'liked' ? 'removeLiked' : 'removeBorrowed';
+
+            return `
+        <div class="flex flex-col gap-3 group relative">
+            <a href="book-details.html?id=${book.id}" class="w-full bg-center bg-no-repeat aspect-[3/4] bg-cover rounded-lg shadow-sm transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1" style='background-image: url("${coverUrl}");'></a>
+            <button class="absolute top-2 right-2 flex items-center justify-center size-8 bg-black/50 dark:bg-black/70 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity" onclick="event.preventDefault(); ${removeFunction}(${book.id})">
+                <span class="material-symbols-outlined text-lg">close</span>
+            </button>
+            <div>
+                <p class="text-slate-800 dark:text-slate-200 text-base font-medium leading-normal">${escapeHtml(book.title)}</p>
+                <p class="text-slate-500 dark:text-slate-400 text-sm font-normal leading-normal">${escapeHtml(authors)}</p>
+            </div>
+        </div>
+    `;
+        }
+
+        // Functions are now imported from user-books.js module above
+
+        function removeLiked(bookId) {
+            removeFromLiked(bookId);
+            // Adjust current page if needed
+            const totalLiked = getLikedBooks().length;
+            const maxPages = Math.ceil(totalLiked / pageSize);
+            if (likedCurrentPage >= maxPages && maxPages > 0) {
+                likedCurrentPage = maxPages - 1;
+            }
+            loadMyBooks();
+        }
+
+        function removeBorrowed(bookId) {
+            removeFromBorrowed(bookId);
+            // Adjust current page if needed
+            const totalBorrowed = getBorrowedBooks().length;
+            const maxPages = Math.ceil(totalBorrowed / pageSize);
+            if (borrowedCurrentPage >= maxPages && maxPages > 0) {
+                borrowedCurrentPage = maxPages - 1;
+            }
+            loadMyBooks();
+        }
+
+        // Pagination state
+        const pageSize = 25; // 5 rows × 5 columns
+        let likedCurrentPage = 0;
+        let borrowedCurrentPage = 0;
+
+        function renderPagination(currentPage, totalPages, sectionType) {
+            const paginationId = sectionType === 'liked' ? 'liked-pagination' : 'borrowed-pagination';
+            const pagination = document.getElementById(paginationId);
+            if (!pagination) return;
+
+            if (totalPages === 0 || totalPages === 1) {
+                pagination.innerHTML = '';
+                return;
+            }
+
+            const hasPrevious = currentPage > 0;
+            const hasNext = currentPage < totalPages - 1;
+            const currentPageNum = currentPage + 1; // 1-based for display
+
+            const pages = [];
+
+            // Add first 3 pages
+            for (let i = 1; i <= Math.min(3, totalPages); i++) {
+                pages.push(i);
+            }
+
+            // If current page is beyond the first 3 pages
+            if (currentPageNum > 3) {
+                if (currentPageNum > 4) {
+                    pages.push('ellipsis1');
+                }
+                if (currentPageNum < totalPages) {
+                    pages.push(currentPageNum);
+                }
+            }
+
+            // Add ellipsis before last page if needed
+            if (totalPages > 3) {
+                const lastInPages = pages[pages.length - 1];
+                const lastPageNum = typeof lastInPages === 'number' ? lastInPages : currentPageNum;
+
+                if (lastPageNum < totalPages - 1) {
+                    pages.push('ellipsis2');
+                }
+
+                if (!pages.includes(totalPages)) {
+                    pages.push(totalPages);
+                }
+            }
+
+            // Build HTML
+            let html = '<nav aria-label="Pagination" class="flex items-center gap-2">';
+
+            // Previous arrow button
+            html += `
+        <a 
+            onclick="goToPage('${sectionType}', ${currentPage - 1}); return false;" 
+            ${!hasPrevious ? 'aria-disabled="true" tabindex="-1"' : 'href="#"'}
+            class="inline-flex items-center justify-center size-9 rounded-full text-sm font-medium border border-border-light dark:border-border-dark transition-colors ${hasPrevious ? 'hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer' : 'opacity-50 cursor-not-allowed pointer-events-none'}"
+            aria-label="Previous page"
+        >
+            <span class="material-symbols-outlined text-base">chevron_left</span>
+        </a>
+    `;
+
+            // Page numbers
+            pages.forEach((page) => {
+                if (typeof page === 'string' && page.startsWith('ellipsis')) {
+                    html += `<span class="inline-flex items-center justify-center size-9 text-sm font-medium">...</span>`;
+                } else {
+                    const isActive = page === currentPageNum;
+                    html += `
+                <a 
+                    onclick="goToPage('${sectionType}', ${page - 1}); return false;" 
+                    href="#"
+                    class="inline-flex items-center justify-center size-9 rounded-full text-sm font-medium border border-border-light dark:border-border-dark transition-colors ${isActive ? 'bg-primary text-white border-primary' : 'hover:bg-gray-100 dark:hover:bg-gray-800'}"
+                >
+                    ${page}
+                </a>
+            `;
+                }
+            });
+
+            // Next arrow button
+            html += `
+        <a 
+            onclick="goToPage('${sectionType}', ${currentPage + 1}); return false;" 
+            ${!hasNext ? 'aria-disabled="true" tabindex="-1"' : 'href="#"'}
+            class="inline-flex items-center justify-center size-9 rounded-full text-sm font-medium border border-border-light dark:border-border-dark transition-colors ${hasNext ? 'hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer' : 'opacity-50 cursor-not-allowed pointer-events-none'}"
+            aria-label="Next page"
+        >
+            <span class="material-symbols-outlined text-base">chevron_right</span>
+        </a>
+    `;
+
+            html += '</nav>';
+            pagination.innerHTML = html;
+        }
+
+        function goToPage(sectionType, page) {
+            if (sectionType === 'liked') {
+                const totalPages = Math.ceil(getLikedBooks().length / pageSize);
+                if (page < 0 || page >= totalPages) return;
+                likedCurrentPage = page;
+                // Scroll to section
+                const likedSection = document.getElementById('liked-section');
+                if (likedSection) {
+                    likedSection.scrollIntoView({ behavior: 'auto', block: 'start' });
+                }
+                loadLikedBooks();
+            } else {
+                const totalPages = Math.ceil(getBorrowedBooks().length / pageSize);
+                if (page < 0 || page >= totalPages) return;
+                borrowedCurrentPage = page;
+                // Scroll to section
+                const borrowedSection = document.getElementById('borrowed-section');
+                if (borrowedSection) {
+                    borrowedSection.scrollIntoView({ behavior: 'auto', block: 'start' });
+                }
+                loadBorrowedBooks();
+            }
+        }
+
+        function loadLikedBooks() {
+            const likedGrid = document.getElementById('liked-books-grid');
+            const likedPagination = document.getElementById('liked-pagination');
+            const likedSection = document.getElementById('liked-section');
+
+            if (!likedGrid) return;
+
+            try {
+                const allLikedBooks = getLikedBooks();
+                const totalPages = Math.ceil(allLikedBooks.length / pageSize);
+                
+                if (allLikedBooks.length === 0) {
+                    likedGrid.innerHTML = '<div class="col-span-5 text-center py-8 text-gray-500 dark:text-gray-400">No liked books yet.</div>';
+                    if (likedPagination) likedPagination.innerHTML = '';
+                    likedSection.classList.add('hidden');
+                    return;
+                }
+
+                // Get books for current page
+                const startIndex = likedCurrentPage * pageSize;
+                const endIndex = startIndex + pageSize;
+                const pageBooks = allLikedBooks.slice(startIndex, endIndex);
+
+                // Render books (5 columns)
+                likedGrid.innerHTML = pageBooks.map(book => renderBookCard(book, 'liked')).join('');
+
+                // Render pagination
+                if (likedPagination) {
+                    renderPagination(likedCurrentPage, totalPages, 'liked');
+                }
+
+                likedSection.classList.remove('hidden');
+            } catch (error) {
+                console.error('Error loading liked books:', error);
+                likedGrid.innerHTML = `<div class="col-span-5 text-center py-8 text-red-500">Error loading books: ${error.message}</div>`;
+            }
+        }
+
+        function loadBorrowedBooks() {
+            const borrowedGrid = document.getElementById('borrowed-books-grid');
+            const borrowedPagination = document.getElementById('borrowed-pagination');
+            const borrowedSection = document.getElementById('borrowed-section');
+
+            if (!borrowedGrid) return;
+
+            try {
+                const allBorrowedBooks = getBorrowedBooks();
+                const totalPages = Math.ceil(allBorrowedBooks.length / pageSize);
+                
+                if (allBorrowedBooks.length === 0) {
+                    borrowedGrid.innerHTML = '<div class="col-span-5 text-center py-8 text-gray-500 dark:text-gray-400">No borrowed books yet.</div>';
+                    if (borrowedPagination) borrowedPagination.innerHTML = '';
+                    borrowedSection.classList.add('hidden');
+                    return;
+                }
+
+                // Get books for current page
+                const startIndex = borrowedCurrentPage * pageSize;
+                const endIndex = startIndex + pageSize;
+                const pageBooks = allBorrowedBooks.slice(startIndex, endIndex);
+
+                // Render books (5 columns)
+                borrowedGrid.innerHTML = pageBooks.map(book => renderBookCard(book, 'borrowed')).join('');
+
+                // Render pagination
+                if (borrowedPagination) {
+                    renderPagination(borrowedCurrentPage, totalPages, 'borrowed');
+                }
+
+                borrowedSection.classList.remove('hidden');
+            } catch (error) {
+                console.error('Error loading borrowed books:', error);
+                borrowedGrid.innerHTML = `<div class="col-span-5 text-center py-8 text-red-500">Error loading books: ${error.message}</div>`;
+            }
+        }
+
+        async function loadMyBooks() {
+            const emptyState = document.getElementById('empty-state');
+            const likedSection = document.getElementById('liked-section');
+            const borrowedSection = document.getElementById('borrowed-section');
+
+            try {
+                const allLikedBooks = getLikedBooks();
+                const allBorrowedBooks = getBorrowedBooks();
+
+                // Reset pagination if needed
+                if (allLikedBooks.length === 0) {
+                    likedCurrentPage = 0;
+                }
+                if (allBorrowedBooks.length === 0) {
+                    borrowedCurrentPage = 0;
+                }
+
+                // Load both sections
+                loadLikedBooks();
+                loadBorrowedBooks();
+
+                // Show empty state only if both are empty
+                if (allLikedBooks.length === 0 && allBorrowedBooks.length === 0) {
+                    emptyState.classList.remove('hidden');
+                    if (likedSection) likedSection.classList.add('hidden');
+                    if (borrowedSection) borrowedSection.classList.add('hidden');
+                } else {
+                    emptyState.classList.add('hidden');
+                }
+
+            } catch (error) {
+                console.error('Error loading books:', error);
+            }
+        }
+
+        window.goToPage = goToPage;
+
+        window.removeLiked = removeLiked;
+        window.removeBorrowed = removeBorrowed;
+
+        loadMyBooks();
+    </script>
+</body>
+
+</html>

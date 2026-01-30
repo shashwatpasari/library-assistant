@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>My Books - Library</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#197fe6",
+              "background-light": "#f6f7f8",
+              "background-dark": "#111921",
+            },
+            fontFamily: {
+              "display": ["Inter", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark">
+<div class="relative flex h-auto min-h-screen w-full flex-col group/design-root overflow-x-hidden">
+<div class="layout-container flex h-full grow flex-col">
+<div class="px-4 md:px-10 lg:px-20 xl:px-40 flex flex-1 justify-center py-5">
+<div class="layout-content-container flex flex-col max-w-[960px] flex-1">
+<!-- TopNavBar -->
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 dark:border-slate-800 px-4 sm:px-10 py-3">
+<div class="flex items-center gap-4 text-slate-800 dark:text-slate-200">
+<div class="size-6 text-primary">
+<svg fill="none" viewbox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_6_535)">
+<path clip-rule="evenodd" d="M47.2426 24L24 47.2426L0.757355 24L24 0.757355L47.2426 24ZM12.2426 21H35.7574L24 9.24264L12.2426 21Z" fill="currentColor" fill-rule="evenodd"></path>
+</g>
+<defs>
+<clippath id="clip0_6_535"><rect fill="white" height="48" width="48"></rect></clippath>
+</defs>
+</svg>
+</div>
+<h2 class="text-slate-800 dark:text-slate-200 text-lg font-bold leading-tight tracking-[-0.015em]">Library</h2>
+</div>
+<div class="hidden md:flex flex-1 justify-end gap-8">
+<div class="flex items-center gap-9">
+<a class="text-slate-600 dark:text-slate-300 text-sm font-medium leading-normal hover:text-primary dark:hover:text-primary transition-colors" href="#">Home</a>
+<a class="text-slate-600 dark:text-slate-300 text-sm font-medium leading-normal hover:text-primary dark:hover:text-primary transition-colors" href="#">Browse</a>
+<a class="text-primary text-sm font-bold leading-normal" href="#">My Books</a>
+</div>
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10" data-alt="User avatar placeholder" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAkkvprciNr6HaKtuzY3FY6ydOleUtLts0FyXpok3h4qeRV1XPZbPrzbPCCDh6HWHbsaU_QgnF2ZMvLBAVhSOJEMPWRaCX0KKIvPEj-Yp1pqo68RwkrTWQC8zeeOdN9zi3_Zb6Jk-ruSAyVxlVR7-Cp2BKyarBQRCLPvstlGUS8peplobW7_L9GZq_nfi3OFXrNmrg1Mx7sjcz_3dGBaUNUCJT_NPX7dTwP79UiEC-X5CdulQv0zoNM63iTiL_qnz44bf4hjZGumR7F");'></div>
+</div>
+<button class="md:hidden flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 gap-2 text-sm font-bold leading-normal tracking-[0.015em] min-w-0 px-2.5">
+<span class="material-symbols-outlined text-slate-600 dark:text-slate-300">menu</span>
+</button>
+</header>
+<main class="flex flex-col flex-1 p-4 md:p-6 lg:p-8">
+<!-- PageHeading -->
+<div class="flex flex-wrap justify-between gap-3 mb-8">
+<div class="flex min-w-72 flex-col gap-2">
+<h1 class="text-slate-900 dark:text-white text-4xl font-black leading-tight tracking-[-0.033em]">My Books</h1>
+<p class="text-slate-500 dark:text-slate-400 text-base font-normal leading-normal">Your personal collection of books you've saved.</p>
+</div>
+</div>
+<!-- ImageGrid -->
+<div class="grid grid-cols-[repeat(auto-fit,minmax(158px,1fr))] gap-6">
+<div class="flex flex-col gap-3 group relative">
+<div class="w-full bg-center bg-no-repeat aspect-[3/4] bg-cover rounded-lg shadow-sm transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1" data-alt="Book cover for Dune" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuB3DIbL83KKHJ6C0bjdcsxP52wErFPNQie5HCla0M6KP-FR1W_bMKY3KbfBS7h4XeP3aGlcwN23rP-EcaOBCsPhScQ1YcUnrX7q7MUAoPl8FAa336EKpZiht0HVybEGRfGzbtegVciOqzA1ZyJjFICth2sVUs3J9TvYrCaK7P6Om7UYwCCgEEG40UpkkHoTkst6ZcaVGJi4TCgXVKPEQIft3ZswzwLq6sO5TL23WeFFiyqMJfjlzto88rPP3qtkyzfq3PCTTMxzRBTC");'></div>
+<button class="absolute top-2 right-2 flex items-center justify-center size-8 bg-black/50 dark:bg-black/70 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-lg">close</span>
+</button>
+<div>
+<p class="text-slate-800 dark:text-slate-200 text-base font-medium leading-normal">Dune</p>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-normal leading-normal">Frank Herbert</p>
+</div>
+</div>
+<div class="flex flex-col gap-3 group relative">
+<div class="w-full bg-center bg-no-repeat aspect-[3/4] bg-cover rounded-lg shadow-sm transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1" data-alt="Book cover for The Hobbit" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAAetof2_zKF6TpYum2oEbONCJvgtas0euF9ygtLKL8-aW1dYnXxbza0cP279gZNd1hZIJBj7oiR6guDX7UPVLhP4wPmpX_jWadd9BVq2Dm3Zep2biMzNzZwT5kfTVMf43q5EUZv-leWOgZuhiUf2zq4-gz65j7vtasmmdf_vwLKNE141nUQiNF50UjzSoWAAttWuUE-L1B6oOVDfdysw20NyozKf4b-6czEeYXeAwnl8rGdHrsLa9ozPu0BOHTomhQsIQVlyS0_lhu");'></div>
+<button class="absolute top-2 right-2 flex items-center justify-center size-8 bg-black/50 dark:bg-black/70 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-lg">close</span>
+</button>
+<div>
+<p class="text-slate-800 dark:text-slate-200 text-base font-medium leading-normal">The Hobbit</p>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-normal leading-normal">J.R.R. Tolkien</p>
+</div>
+</div>
+<div class="flex flex-col gap-3 group relative">
+<div class="w-full bg-center bg-no-repeat aspect-[3/4] bg-cover rounded-lg shadow-sm transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1" data-alt="Book cover for Pride and Prejudice" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBsCBfNw0mCBnUQOgx17AnOuE8nAEYxkWl26roXIZUGcX5LYjbPdZPv3LXxXDCFv4mzzRQyMXM0ZXP4g-HWGsnBYyoxm8s1px6XlROJ2-b5-YlkEez5Lqxx1M5KCrfmu_1v8dek00A-C1D-I0nEiEyAoiSZt9wEkvZS-_7nq-Rh4S8kI7bWPU-qycMeGD9I6po3fYt7U-K-6g5Ku8IWenqg9vO3q_yUK-cb4X473HTGgGMt7GoVIxpULEH2bblz8X_SfLSCgtZw5kmX");'></div>
+<button class="absolute top-2 right-2 flex items-center justify-center size-8 bg-black/50 dark:bg-black/70 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-lg">close</span>
+</button>
+<div>
+<p class="text-slate-800 dark:text-slate-200 text-base font-medium leading-normal">Pride and Prejudice</p>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-normal leading-normal">Jane Austen</p>
+</div>
+</div>
+<div class="flex flex-col gap-3 group relative">
+<div class="w-full bg-center bg-no-repeat aspect-[3/4] bg-cover rounded-lg shadow-sm transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1" data-alt="Book cover for 1984" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBuBfpy8sVCqCVyzE_tXO-AAoGddpx0w69XxXcK5EJb14WeN1dQileHUsCaYfX_w96-y-2o2vYb8sH6DO2MZkkuRoLNP5xpFlX4sPLu_wgWkoFPIg-eBOL0RjHVo-YO9Da7hYPfIwfihR7usER1TloNDhu39BXnwu-arh6YpFS5ogjaj4DdTLjApAgi_CQwDey1ntwjSzb2dtmceZNvwaSMGdMt3vDO8nj0cs6abjwPMkTNqSn2huzJ31GsJGun1TwK2PUjGOqvBHzm");'></div>
+<button class="absolute top-2 right-2 flex items-center justify-center size-8 bg-black/50 dark:bg-black/70 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-lg">close</span>
+</button>
+<div>
+<p class="text-slate-800 dark:text-slate-200 text-base font-medium leading-normal">1984</p>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-normal leading-normal">George Orwell</p>
+</div>
+</div>
+<div class="flex flex-col gap-3 group relative">
+<div class="w-full bg-center bg-no-repeat aspect-[3/4] bg-cover rounded-lg shadow-sm transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1" data-alt="Book cover for To Kill a Mockingbird" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDax8RwmZ9OJueu13c2rrg9oT9gNhgyaVfzdzUbWlpes9L8-ImDT7km1gMaBLDaExj3WRii2-gg5JMiNJae0OE9rw8QSqUYDHlpPknieonPkLUG5kuyF4OdXS8Mu9i0afChWMLH_vPHwMB1zcclkp9iVVlLGJBwTq53cDWlRA1dSLb4J1M49dU8E1B2W2zbyX4L7iza1hL9zZVWudsgbnMEZZPbWPBL4yTNFv-J9vP9-OPr5HiWWs2VUp02auzjUIH_gcXhjk9F0HfW");'></div>
+<button class="absolute top-2 right-2 flex items-center justify-center size-8 bg-black/50 dark:bg-black/70 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-lg">close</span>
+</button>
+<div>
+<p class="text-slate-800 dark:text-slate-200 text-base font-medium leading-normal">To Kill a Mockingbird</p>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-normal leading-normal">Harper Lee</p>
+</div>
+</div>
+<div class="flex flex-col gap-3 group relative">
+<div class="w-full bg-center bg-no-repeat aspect-[3/4] bg-cover rounded-lg shadow-sm transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1" data-alt="Book cover for The Great Gatsby" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAn0ITm17soQCgyFQ7afl8ZpgeN1Jl71jLdVaPCywEwSWIOuUrSJW7WDK1VdF1f9zm6kgte7yFYKQCvwEBJkrCw13hnBGyp1KRGSid1YW-UlLpVoGCxElWdOHao7shtKUpUTvqRl1Gr5kniOae3Tw-KqV4ristknCjIG6Qb5btvh2T2XonXuso20NJ7no3XfF8H1hdkCF4panmYWbUZ41ef48b4tTJK4ckMGDtX1SEbaVPahmaN40Bpmv2s5ZuwR43Jra1IPypV4vgf");'></div>
+<button class="absolute top-2 right-2 flex items-center justify-center size-8 bg-black/50 dark:bg-black/70 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-lg">close</span>
+</button>
+<div>
+<p class="text-slate-800 dark:text-slate-200 text-base font-medium leading-normal">The Great Gatsby</p>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-normal leading-normal">F. Scott Fitzgerald</p>
+</div>
+</div>
+<div class="flex flex-col gap-3 group relative">
+<div class="w-full bg-center bg-no-repeat aspect-[3/4] bg-cover rounded-lg shadow-sm transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1" data-alt="Book cover for Moby Dick" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuClIYsSSdUSNLmjeDasp9FMe9jySY52HsrK9qLw74zxYF4a-6665v8j2VLzeaPtNhlLT9Xbh5HVFZV4m0NoiLVSE1Zd-N_HSQMXYULR50NEmYchC8tk6WdzZ5kz0KvvOHGQ27-Mj8aiT5XjPIMORZhP-ASRVPORbfiPefztidOje645zeneObL8vNXajPq013w20mP__L7WCREHMxZ9bCZnHoHdIapqBIZLfWW-aOSOpZ70yfXPDO6mzNr9ErEVdvZ4rHqrgNIdobik");'></div>
+<button class="absolute top-2 right-2 flex items-center justify-center size-8 bg-black/50 dark:bg-black/70 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-lg">close</span>
+</button>
+<div>
+<p class="text-slate-800 dark:text-slate-200 text-base font-medium leading-normal">Moby Dick</p>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-normal leading-normal">Herman Melville</p>
+</div>
+</div>
+<div class="flex flex-col gap-3 group relative">
+<div class="w-full bg-center bg-no-repeat aspect-[3/4] bg-cover rounded-lg shadow-sm transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1" data-alt="Book cover for The Lord of the Rings" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBhe4gSR1DMLw6ANy6gIKAp17XhGCHTzYAkcuT1o_X-PxnvsdMjK7tKLqIOqYmJohXqrnEhaFZRcG9qLDzu7qOuMExoo8nr65LXqy2Yg957dEbAwZZ1JFeEPgtmE6C_jgIzaULT90jU6mlYRRAaBKA7fVDETvhoxwibM7Yn6bqtRd0dbXK1OWw3NnISJKnzu7zlF4pO2HfomVh5sVq_MMlGHLpRwkm9b3d-fv3lIBJkjyJCInPuHYEDFUqcC0cBDpCpxaaD3cETDgDu");'></div>
+<button class="absolute top-2 right-2 flex items-center justify-center size-8 bg-black/50 dark:bg-black/70 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-lg">close</span>
+</button>
+<div>
+<p class="text-slate-800 dark:text-slate-200 text-base font-medium leading-normal">The Lord of the Rings</p>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-normal leading-normal">J.R.R. Tolkien</p>
+</div>
+</div>
+</div>
+<!-- EmptyState (example, can be shown conditionally) -->
+<!-- 
+                        <div class="flex flex-col px-4 py-16">
+                            <div class="flex flex-col items-center gap-6">
+                                <div class="text-primary dark:text-primary/70">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" fill="currentColor" viewBox="0 0 256 256"><path d="M222.8,114.75l-80-80a12,12,0,0,0-17.6,0l-80,80A12,12,0,0,0,36,132H60v76a12,12,0,0,0,12,12H184a12,12,0,0,0,12-12V132h24a12,12,0,0,0,8.8-20.25ZM184,208H140V156a12,12,0,0,0-12-12H128a12,12,0,0,0-12,12v52H72V125.14l-6.8,6.8a12.12,12.12,0,0,0-8.8,11.56H212A12,12,0,0,0,224,132h-.4a12.06,12.06,0,0,0-8.8-11.56l-6.8-6.8Z"></path></svg>
+                                </div>
+                                <div class="flex max-w-[480px] flex-col items-center gap-2">
+                                    <p class="text-slate-800 dark:text-slate-200 text-lg font-bold leading-tight tracking-[-0.015em] max-w-[480px] text-center">Your Favorite Bookshelf is Waiting</p>
+                                    <p class="text-slate-600 dark:text-slate-400 text-sm font-normal leading-normal max-w-[480px] text-center">Use the heart icon on any book to add it to your personal collection.</p>
+                                </div>
+                                <button class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors">
+                                    <span class="truncate">Start Exploring</span>
+                                </button>
+                            </div>
+                        </div>
+                        -->
+</main>
+<!-- Footer -->
+<footer class="flex flex-col gap-6 px-5 py-10 text-center @container border-t border-slate-200 dark:border-slate-800 mt-12">
+<div class="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 @[480px]:flex-row @[480px]:justify-around">
+<a class="text-slate-500 dark:text-slate-400 text-base font-normal leading-normal min-w-40 hover:text-primary dark:hover:text-primary transition-colors" href="#">About</a>
+<a class="text-slate-500 dark:text-slate-400 text-base font-normal leading-normal min-w-40 hover:text-primary dark:hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="text-slate-500 dark:text-slate-400 text-base font-normal leading-normal min-w-40 hover:text-primary dark:hover:text-primary transition-colors" href="#">Terms of Service</a>
+<a class="text-slate-500 dark:text-slate-400 text-base font-normal leading-normal min-w-40 hover:text-primary dark:hover:text-primary transition-colors" href="#">Contact</a>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-base font-normal leading-normal">© 2024 Library Management Systems. All Rights Reserved.</p>
+</footer>
+</div>
+</div>
+</div>
+</div>
+</body></html>
