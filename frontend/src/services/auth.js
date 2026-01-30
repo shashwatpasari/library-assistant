@@ -2,7 +2,8 @@
  * Authentication service for user login, signup, and token management.
  */
 
-const API_BASE_URL = 'http://localhost:8000';
+// API_BASE_URL can be overridden by setting window.API_BASE_URL before loading this script
+const API_BASE_URL = window.API_BASE_URL || 'http://localhost:8000';
 const TOKEN_KEY = 'auth_token';
 const USER_KEY = 'current_user';
 

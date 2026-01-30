@@ -4,8 +4,10 @@ Authentication service for user management and JWT token generation.
 
 from __future__ import annotations
 
+import os
+import re
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Optional, Tuple
 
 import bcrypt
 from jose import JWTError, jwt
@@ -14,10 +16,10 @@ from sqlalchemy.orm import Session
 
 from app.models import User
 
-# JWT settings
-SECRET_KEY = "library-assistant-secret-key-change-in-production"  # In production, use environment variable
+# JWT settings - SECRET_KEY must be set via environment variable in production
+SECRET_KEY = os.getenv("JWT_SECRET_KEY", "dev-only-secret-key-change-in-production")
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30 * 24 * 60  # 30 days
+ACCESS_TOKEN_EXPIRE_MINUTES = 7 * 24 * 60  # 7 days (reduced from 30 for security)
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -32,6 +34,29 @@ def get_password_hash(password: str) -> str:
     salt = bcrypt.gensalt(rounds=12)
     hashed = bcrypt.hashpw(password.encode('utf-8'), salt)
     return hashed.decode('utf-8')
+
+
+def validate_password_strength(password: str) -> Tuple[bool, str]:
+    """
+    Validate password strength.
+    Returns (is_valid, error_message).
+    """
+    if len(password) < 8:
+        return False, "Password must be at least 8 characters long"
+    
+    if not re.search(r'\d', password):
+        return False, "Password must contain at least one number"
+    
+    if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+        return False, "Password must contain at least one special character (!@#$%^&*(),.?\":{}|<>)"
+    
+    if not re.search(r'[A-Z]', password):
+        return False, "Password must contain at least one uppercase letter"
+    
+    if not re.search(r'[a-z]', password):
+        return False, "Password must contain at least one lowercase letter"
+    
+    return True, ""
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:

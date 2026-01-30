@@ -2,7 +2,8 @@
  * API service for communicating with the backend FastAPI server.
  */
 
-const API_BASE_URL = 'http://localhost:8000';
+// API_BASE_URL can be overridden by setting window.API_BASE_URL before loading this script
+const API_BASE_URL = window.API_BASE_URL || 'http://localhost:8000';
 
 /**
  * Fetch books from the API with optional filters and pagination.

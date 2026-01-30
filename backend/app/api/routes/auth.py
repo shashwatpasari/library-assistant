@@ -6,8 +6,10 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 from sqlalchemy.orm import Session
 
 if TYPE_CHECKING:
@@ -34,17 +36,30 @@ from app.services.auth import (
     reset_user_password,
     update_user_email,
     update_user_password,
+    validate_password_strength,
     verify_password_reset_token,
 )
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
+# Rate limiter for auth endpoints
+limiter = Limiter(key_func=get_remote_address)
+
 # oauth2_scheme moved to dependencies.py
 
 
 @router.post("/signup", response_model=Token, status_code=status.HTTP_201_CREATED)
-def signup(user_data: UserCreate, session: Session = Depends(db_session_dependency)) -> Token:
+@limiter.limit("3/minute")  # Prevent mass account creation
+def signup(request: Request, user_data: UserCreate, session: Session = Depends(db_session_dependency)) -> Token:
     """Register a new user account."""
+    # Validate password strength
+    is_valid, error_msg = validate_password_strength(user_data.password)
+    if not is_valid:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=error_msg,
+        )
+    
     # Check if email already exists
     existing_user = get_user_by_email(session, user_data.email)
     if existing_user:
@@ -77,7 +92,9 @@ def signup(user_data: UserCreate, session: Session = Depends(db_session_dependen
 
 
 @router.post("/login", response_model=Token)
+@limiter.limit("5/minute")  # Prevent brute force attacks
 def login(
+    request: Request,
     user_credentials: UserLogin,
     session: Session = Depends(db_session_dependency),
 ) -> Token:
@@ -86,7 +103,7 @@ def login(
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User not found",
+            detail="Invalid email or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
@@ -177,6 +194,14 @@ def change_password(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="New passwords do not match",
         )
+    
+    # Validate password strength
+    is_valid, error_msg = validate_password_strength(password_data.new_password)
+    if not is_valid:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=error_msg,
+        )
 
     try:
         update_user_password(
@@ -194,7 +219,9 @@ def change_password(
 
 
 @router.post("/forgot-password", response_model=dict)
+@limiter.limit("3/minute")  # Prevent email enumeration attacks
 async def forgot_password(
+    request: Request,
     forgot_data: ForgotPassword,
     session: Session = Depends(db_session_dependency),
 ) -> dict:
@@ -234,6 +261,14 @@ def reset_password(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="New passwords do not match",
+        )
+    
+    # Validate password strength
+    is_valid, error_msg = validate_password_strength(reset_data.new_password)
+    if not is_valid:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=error_msg,
         )
 
     try:

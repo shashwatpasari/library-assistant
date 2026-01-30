@@ -18,4 +18,4 @@ pgvector>=0.2.0
 sentence-transformers>=2.2.0
 httpx>=0.25.0
 sse-starlette>=1.6.0
-
+slowapi>=0.1.9

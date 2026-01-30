@@ -35,8 +35,8 @@ async def send_password_reset_email(email: str, reset_token: str, user_name: Opt
     # If SMTP is not configured, skip sending (for development)
     if not SMTP_USER or not SMTP_PASSWORD:
         print(f"[DEV MODE] Password reset email would be sent to {email}")
-        print(f"[DEV MODE] Reset token: {reset_token}")
-        print(f"[DEV MODE] Reset URL: {FRONTEND_URL}/reset-password.html?token={reset_token}&email={email}")
+        print(f"[DEV MODE] Reset URL: {FRONTEND_URL}/reset-password.html?token=***&email={email}")
+        # Note: Token is intentionally NOT logged for security
         return True
     
     try:
