@@ -2,8 +2,6 @@
 Authentication routes for user signup and login.
 """
 
-from __future__ import annotations
-
 from typing import TYPE_CHECKING
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
@@ -50,7 +48,7 @@ limiter = Limiter(key_func=get_remote_address)
 
 @router.post("/signup", response_model=Token, status_code=status.HTTP_201_CREATED)
 @limiter.limit("3/minute")  # Prevent mass account creation
-def signup(request: Request, user_data: UserCreate, session: Session = Depends(db_session_dependency)) -> Token:
+def signup(user_data: UserCreate, request: Request, session: Session = Depends(db_session_dependency)) -> Token:
     """Register a new user account."""
     # Validate password strength
     is_valid, error_msg = validate_password_strength(user_data.password)
@@ -94,8 +92,8 @@ def signup(request: Request, user_data: UserCreate, session: Session = Depends(d
 @router.post("/login", response_model=Token)
 @limiter.limit("5/minute")  # Prevent brute force attacks
 def login(
-    request: Request,
     user_credentials: UserLogin,
+    request: Request,
     session: Session = Depends(db_session_dependency),
 ) -> Token:
     """Authenticate a user and return an access token."""
@@ -221,8 +219,8 @@ def change_password(
 @router.post("/forgot-password", response_model=dict)
 @limiter.limit("3/minute")  # Prevent email enumeration attacks
 async def forgot_password(
-    request: Request,
     forgot_data: ForgotPassword,
+    request: Request,
     session: Session = Depends(db_session_dependency),
 ) -> dict:
     """Generate a password reset token for a user and send it via email."""

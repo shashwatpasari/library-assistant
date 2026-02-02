@@ -9,7 +9,12 @@ from sqlalchemy import select
 
 from app.api.dependencies import db_session_dependency, get_current_user
 from app.models import User, UserPreference
-from app.schemas import UserPreferenceBase, UserPreferenceCreate, UserPreferenceRead
+from app.schemas import UserPreferenceBase, UserPreferenceCreate, UserPreferenceRead, BookRead
+from app.services.recommendations import (
+    get_personalized_recommendations,
+    get_available_themes,
+    get_available_moods
+)
 
 router = APIRouter(
     prefix="/users",
@@ -54,3 +59,31 @@ def update_my_preferences(
         db.commit()
         db.refresh(new_pref)
         return new_pref
+
+
+@router.get("/me/recommendations", response_model=list[BookRead])
+def get_my_recommendations(
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: Session = Depends(db_session_dependency),
+    limit: int = 20
+):
+    """Get personalized book recommendations based on user preferences."""
+    books = get_personalized_recommendations(db, current_user.id, limit=limit)
+    return books
+
+
+@router.get("/preferences/available-themes", response_model=list[str])
+def list_available_themes(
+    db: Session = Depends(db_session_dependency)
+):
+    """Get list of available themes for onboarding selection."""
+    return get_available_themes(db)
+
+
+@router.get("/preferences/available-moods", response_model=list[str])
+def list_available_moods(
+    db: Session = Depends(db_session_dependency)
+):
+    """Get list of available moods for onboarding selection."""
+    return get_available_moods(db)
+

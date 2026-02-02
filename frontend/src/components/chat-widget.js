@@ -1,10 +1,10 @@
 /**
  * Shared chat widget component for all pages
- * Provides consistent AI assistant chat interface with minimize/expand functionality
+ * Provides consistent AI assistant chat interface as a right-side panel
  */
 
 /**
- * Renders the chat widget HTML
+ * Renders the chat widget HTML as a right-side panel
  * @param {Object} options - Configuration options
  * @param {string} options.greeting - Custom greeting message
  * @param {string} options.bookTitle - Book title for context (optional)
@@ -37,6 +37,28 @@ export function renderChatWidget(options = {}) {
 
     const styles = `
         <style>
+            /* Right panel slide-in animation */
+            .chat-panel {
+                transform: translateX(100%);
+                transition: transform 0.3s ease-in-out;
+            }
+            .chat-panel.open {
+                transform: translateX(0);
+            }
+            
+            /* Toggle button styles */
+            .chat-toggle-btn {
+                transition: all 0.2s ease;
+            }
+            .chat-toggle-btn:hover {
+                transform: scale(1.05);
+            }
+            .chat-toggle-btn.active {
+                background: #3A86FF;
+                color: white;
+            }
+            
+            /* Book card styles */
             .book-card-grid {
                 display: flex;
                 flex-wrap: wrap;
@@ -121,44 +143,57 @@ export function renderChatWidget(options = {}) {
                 text-overflow: ellipsis;
                 white-space: nowrap;
             }
+            
+            /* No background shift - panel overlays content */
         </style>
     `;
 
     return styles + `
-        <div class="fixed bottom-4 right-4 z-40">
-            <!-- Collapsed state: Just a button -->
-            <button id="chat-toggle" class="w-14 h-14 rounded-full bg-primary text-white shadow-lg hover:bg-primary/90 transition-all flex items-center justify-center">
-                <span class="material-symbols-outlined !text-2xl">chat</span>
-            </button>
-            <!-- Expanded state: Full chat widget - 50vw/90vh -->
-            <div id="chat-widget" class="hidden w-[50vw] h-[90vh] bg-white dark:bg-gray-900/95 backdrop-blur-sm rounded-xl border border-gray-200 dark:border-gray-800 shadow-xl flex flex-col">
-                <div class="p-4 border-b border-gray-200 dark:border-gray-800 flex-shrink-0 flex items-center justify-between">
-                    <div>
-                        <h3 class="font-bold text-lg text-[#111418] dark:text-white">Ask an Assistant</h3>
-                        <p class="text-sm text-[#637588] dark:text-gray-400">Powered by RAG AI</p>
-                    </div>
-                    <button id="chat-close" class="flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" title="Minimize chat">
-                        <span class="material-symbols-outlined !text-xl text-[#637588] dark:text-gray-400">expand_more</span>
+        <!-- Toggle button in header area (will be positioned by header component) -->
+        <button id="chat-toggle" class="chat-toggle-btn fixed top-4 right-4 z-50 w-10 h-10 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center justify-center shadow-sm" title="Toggle AI Assistant">
+            <span class="material-symbols-outlined !text-xl text-gray-600 dark:text-gray-300">vertical_split</span>
+        </button>
+        
+        <!-- Right side panel -->
+        <div id="chat-panel" class="chat-panel fixed top-0 right-0 h-full w-[800px] bg-white dark:bg-gray-900 border-l border-gray-200 dark:border-gray-700 z-[9999] flex flex-col shadow-2xl">
+            <!-- Panel header -->
+            <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0 flex items-center justify-between bg-gray-50 dark:bg-gray-800/50">
+                <div>
+                    <h3 class="font-bold text-lg text-[#111418] dark:text-white">
+                        Library Assistant
+                    </h3>
+                    <p class="text-xs text-[#637588] dark:text-gray-400">Powered by RAG</p>
+                </div>
+                <div class="flex items-center gap-1">
+                    <button id="chat-clear" class="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="Clear chat">
+                        <span class="material-symbols-outlined !text-xl text-[#637588] dark:text-gray-400">refresh</span>
+                    </button>
+                    <button id="chat-close" class="flex items-center justify-center w-8 h-8 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors" title="Close panel">
+                        <span class="material-symbols-outlined !text-xl text-[#637588] dark:text-gray-400">close</span>
                     </button>
                 </div>
-                <div id="chat-messages" class="flex-1 p-4 overflow-y-auto space-y-4">
-                    <div class="flex justify-start">
-                        <div class="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg max-w-xs">
-                            <p class="text-sm text-[#111418] dark:text-gray-200">${escapeHtml(greetingText)}</p>
-                        </div>
+            </div>
+            
+            <!-- Chat messages area -->
+            <div id="chat-messages" class="flex-1 p-4 overflow-y-auto space-y-4">
+                <div class="flex justify-start">
+                    <div class="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg max-w-[85%]">
+                        <p class="text-sm text-[#111418] dark:text-gray-200">${escapeHtml(greetingText)}</p>
                     </div>
-                    ${suggestedQuestionsHTML}
                 </div>
-                <div class="p-4 border-t border-gray-200 dark:border-gray-800 flex-shrink-0 bg-white dark:bg-gray-900/80 rounded-b-xl">
-                    <div class="flex items-center gap-2">
-                        <input id="chat-input" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#111418] dark:text-gray-200 focus:outline-0 focus:ring-2 focus:ring-primary border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 focus:border-primary h-11 placeholder:text-[#637588] dark:placeholder:text-gray-500 px-4 text-sm font-normal leading-normal" placeholder="Ask a question..."/>
-                        <button id="chat-mic" class="flex shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 w-11 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors" title="Voice input">
-                            <span class="material-symbols-outlined !text-xl">mic</span>
-                        </button>
-                        <button id="chat-send" class="flex shrink-0 max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 w-11 bg-primary text-white hover:bg-primary/90 transition-colors">
-                            <span class="material-symbols-outlined !text-xl">send</span>
-                        </button>
-                    </div>
+                ${suggestedQuestionsHTML}
+            </div>
+            
+            <!-- Input area -->
+            <div class="p-4 border-t border-gray-200 dark:border-gray-700 flex-shrink-0 bg-gray-50 dark:bg-gray-800/50">
+                <div class="flex items-center gap-2">
+                    <input id="chat-input" class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#111418] dark:text-gray-200 focus:outline-0 focus:ring-2 focus:ring-primary border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 focus:border-primary h-11 placeholder:text-[#637588] dark:placeholder:text-gray-500 px-4 text-sm font-normal leading-normal" placeholder="Ask a question..."/>
+                    <button id="chat-mic" class="flex shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 w-11 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors" title="Voice input">
+                        <span class="material-symbols-outlined !text-xl">mic</span>
+                    </button>
+                    <button id="chat-send" class="flex shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 w-11 bg-primary text-white hover:bg-primary/90 transition-colors">
+                        <span class="material-symbols-outlined !text-xl">send</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -170,14 +205,60 @@ export function renderChatWidget(options = {}) {
  */
 export function initChatWidget() {
     const chatToggle = document.getElementById('chat-toggle');
-    const chatWidget = document.getElementById('chat-widget');
+    const chatPanel = document.getElementById('chat-panel');
     const chatClose = document.getElementById('chat-close');
+    const chatClear = document.getElementById('chat-clear');
     const chatSend = document.getElementById('chat-send');
     const chatInput = document.getElementById('chat-input');
     const chatMessages = document.getElementById('chat-messages');
 
     // Conversation history for multi-turn support
     let conversationHistory = [];
+    let isPanelOpen = false;
+
+    // Session storage keys
+    const CHAT_HISTORY_KEY = 'chat_conversation_history';
+    const CHAT_HTML_KEY = 'chat_messages_html';
+
+    // Restore conversation from sessionStorage on init
+    function restoreChatSession() {
+        try {
+            const savedHistory = sessionStorage.getItem(CHAT_HISTORY_KEY);
+            const savedHtml = sessionStorage.getItem(CHAT_HTML_KEY);
+
+            if (savedHistory) {
+                conversationHistory = JSON.parse(savedHistory);
+            }
+            // Only restore HTML if it has meaningful content (not just error messages)
+            if (savedHtml && chatMessages && savedHtml.trim().length > 100) {
+                chatMessages.innerHTML = savedHtml;
+            }
+        } catch (e) {
+            console.error('Error restoring chat session:', e);
+        }
+    }
+
+    // Save conversation to sessionStorage
+    function saveChatSession() {
+        try {
+            sessionStorage.setItem(CHAT_HISTORY_KEY, JSON.stringify(conversationHistory));
+            if (chatMessages) {
+                sessionStorage.setItem(CHAT_HTML_KEY, chatMessages.innerHTML);
+            }
+        } catch (e) {
+            console.error('Error saving chat session:', e);
+        }
+    }
+
+    // Clear chat session (call on logout)
+    window.clearChatSession = function () {
+        sessionStorage.removeItem(CHAT_HISTORY_KEY);
+        sessionStorage.removeItem(CHAT_HTML_KEY);
+        conversationHistory = [];
+    };
+
+    // Restore previous session on init
+    restoreChatSession();
 
     // Global function to save book from chat card like button
     window.saveBookFromChat = async function (bookId) {
@@ -187,10 +268,9 @@ export function initChatWidget() {
                 alert('Please log in to save books');
                 return;
             }
-            const response = await fetch('http://localhost:8000/saved-books/', {
+            const response = await fetch(`http://localhost:8000/saved-books/${parseInt(bookId, 10)}`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({ book_id: bookId })
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
             });
             if (response.ok) {
                 alert('Book saved to your collection!');
@@ -202,17 +282,48 @@ export function initChatWidget() {
         }
     };
 
-    // Toggle chat widget (expand)
-    chatToggle?.addEventListener('click', () => {
-        chatToggle.classList.add('hidden');
-        chatWidget?.classList.remove('hidden');
-        chatInput?.focus();
+    // Toggle panel open/close
+    function togglePanel() {
+        isPanelOpen = !isPanelOpen;
+        if (isPanelOpen) {
+            chatPanel?.classList.add('open');
+            chatToggle?.classList.add('active');
+            document.body.classList.add('chat-open');
+            chatInput?.focus();
+        } else {
+            chatPanel?.classList.remove('open');
+            chatToggle?.classList.remove('active');
+            document.body.classList.remove('chat-open');
+        }
+    }
+
+    // Toggle button click
+    chatToggle?.addEventListener('click', togglePanel);
+
+    // Close button click
+    chatClose?.addEventListener('click', () => {
+        if (isPanelOpen) {
+            togglePanel();
+        }
     });
 
-    // Minimize chat widget (collapse)
-    chatClose?.addEventListener('click', () => {
-        chatWidget?.classList.add('hidden');
-        chatToggle?.classList.remove('hidden');
+    // Clear chat button click
+    chatClear?.addEventListener('click', () => {
+        // Clear session storage
+        sessionStorage.removeItem(CHAT_HISTORY_KEY);
+        sessionStorage.removeItem(CHAT_HTML_KEY);
+        conversationHistory = [];
+
+        // Reset chat UI to default greeting without page reload
+        if (chatMessages) {
+            chatMessages.innerHTML = `
+                <div class="flex justify-start">
+                    <div class="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg max-w-[85%]">
+                        <p class="text-sm text-[#111418] dark:text-gray-200">Hello! I'm your AI assistant. How can I help you today?</p>
+                    </div>
+                </div>
+            `;
+        }
     });
 
     // Suggested question buttons
@@ -346,10 +457,16 @@ export function initChatWidget() {
         // Add user message to history
         conversationHistory.push({ role: "user", content: message });
 
+        // Limit conversation history to last 10 messages to prevent context overflow
+        const MAX_HISTORY_LENGTH = 10;
+        if (conversationHistory.length > MAX_HISTORY_LENGTH) {
+            conversationHistory = conversationHistory.slice(-MAX_HISTORY_LENGTH);
+        }
+
         // Add user message to UI
         chatMessages.innerHTML += `
             <div class="flex justify-end">
-                <div class="bg-primary text-white p-3 rounded-lg max-w-xs">
+                <div class="bg-primary text-white p-3 rounded-lg max-w-[85%]">
                     <p class="text-sm">${escapeHtml(message)}</p>
                 </div>
             </div>
@@ -360,7 +477,7 @@ export function initChatWidget() {
         const loadingId = 'loading-' + Date.now();
         chatMessages.innerHTML += `
             <div id="${loadingId}" class="flex justify-start">
-                <div class="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg max-w-xs">
+                <div class="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg max-w-[85%]">
                     <p class="text-sm text-[#111418] dark:text-gray-200 flex items-center gap-2">
                         <span class="animate-pulse">●</span>
                         <span class="animate-pulse" style="animation-delay: 0.2s">●</span>
@@ -440,18 +557,24 @@ export function initChatWidget() {
             // Add assistant response to history (without action tags)
             conversationHistory.push({ role: "assistant", content: formattedResponse });
 
+            // Save session after each exchange
+            saveChatSession();
+
         } catch (error) {
             console.error('Chat error:', error);
             document.getElementById(loadingId)?.remove();
 
             chatMessages.innerHTML += `
                 <div class="flex justify-start">
-                    <div class="bg-red-100 dark:bg-red-900/30 p-3 rounded-lg max-w-xs">
+                    <div class="bg-red-100 dark:bg-red-900/30 p-3 rounded-lg max-w-[85%]">
                         <p class="text-sm text-red-600 dark:text-red-400">Sorry, I couldn't process your request. Please try again.</p>
                     </div>
                 </div>
             `;
             chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Save session even on error
+            saveChatSession();
         }
     }
 
@@ -485,7 +608,7 @@ export function initChatWidget() {
             // Not logged in - show message to user
             chatMessages.innerHTML += `
                 <div class="flex justify-start">
-                    <div class="bg-yellow-100 dark:bg-yellow-900/30 p-3 rounded-lg max-w-xs">
+                    <div class="bg-yellow-100 dark:bg-yellow-900/30 p-3 rounded-lg max-w-[85%]">
                         <p class="text-sm text-yellow-700 dark:text-yellow-400">Please log in to save books to your collection.</p>
                     </div>
                 </div>
@@ -506,7 +629,7 @@ export function initChatWidget() {
             if (response.ok) {
                 chatMessages.innerHTML += `
                     <div class="flex justify-start">
-                        <div class="bg-green-100 dark:bg-green-900/30 p-3 rounded-lg max-w-xs">
+                        <div class="bg-green-100 dark:bg-green-900/30 p-3 rounded-lg max-w-[85%]">
                             <p class="text-sm text-green-700 dark:text-green-400">✓ Book saved to your collection!</p>
                         </div>
                     </div>
@@ -557,14 +680,14 @@ function formatResponseWithImages(text, bookData = null) {
             gridHtml += `
             <div class="book-card-item">
                 <div class="book-card-image-container">
-                    <a href="book.html?id=${book.id}" target="_blank">
+                    <a href="book-details.html?id=${book.id}" target="_blank">
                         ${coverHtml}
                     </a>
                     <button class="book-like-btn" onclick="event.preventDefault(); window.saveBookFromChat('${book.id}')" title="Save to my books">
                         <span class="material-symbols-outlined" style="font-size:20px;">favorite</span>
                     </button>
                 </div>
-                <a href="book.html?id=${book.id}" target="_blank" class="book-card-details">
+                <a href="book-details.html?id=${book.id}" target="_blank" class="book-card-details">
                     <div class="book-card-title">${book.title}</div>
                     <div class="book-card-author">${book.author}</div>
                 </a>
@@ -588,4 +711,3 @@ function escapeHtml(text) {
     div.textContent = text;
     return div.innerHTML;
 }
-

@@ -27,7 +27,15 @@ export async function signup(fullName, email, password) {
         const data = await response.json();
 
         if (!response.ok) {
-            throw new Error(data.detail || 'Failed to create account');
+            // Handle Pydantic validation errors (detail is an array of objects)
+            let errorMessage = 'Failed to create account';
+            if (Array.isArray(data.detail)) {
+                // Extract the first validation error message
+                errorMessage = data.detail[0]?.msg || errorMessage;
+            } else if (typeof data.detail === 'string') {
+                errorMessage = data.detail;
+            }
+            throw new Error(errorMessage);
         }
 
         // Store token and user info
@@ -62,7 +70,14 @@ export async function login(email, password) {
     const data = await response.json();
 
     if (!response.ok) {
-        throw new Error(data.detail || 'Incorrect email or password');
+        // Handle Pydantic validation errors (detail is an array of objects)
+        let errorMessage = 'Incorrect email or password';
+        if (Array.isArray(data.detail)) {
+            errorMessage = data.detail[0]?.msg || errorMessage;
+        } else if (typeof data.detail === 'string') {
+            errorMessage = data.detail;
+        }
+        throw new Error(errorMessage);
     }
 
     // Store token and user info
@@ -130,6 +145,10 @@ export function clearUserData() {
     // Also clear old format if any
     localStorage.removeItem('liked_books');
     localStorage.removeItem('borrowed_books');
+
+    // Clear chat session
+    sessionStorage.removeItem('chat_conversation_history');
+    sessionStorage.removeItem('chat_messages_html');
 }
 
 /**
@@ -165,7 +184,13 @@ export async function changeEmail(currentEmail, newEmail, confirmNewEmail) {
     const data = await response.json();
 
     if (!response.ok) {
-        throw new Error(data.detail || 'Failed to change email');
+        let errorMessage = 'Failed to change email';
+        if (Array.isArray(data.detail)) {
+            errorMessage = data.detail[0]?.msg || errorMessage;
+        } else if (typeof data.detail === 'string') {
+            errorMessage = data.detail;
+        }
+        throw new Error(errorMessage);
     }
 
     // Update stored user info
@@ -205,7 +230,13 @@ export async function changePassword(currentPassword, newPassword, confirmNewPas
     const data = await response.json();
 
     if (!response.ok) {
-        throw new Error(data.detail || 'Failed to change password');
+        let errorMessage = 'Failed to change password';
+        if (Array.isArray(data.detail)) {
+            errorMessage = data.detail[0]?.msg || errorMessage;
+        } else if (typeof data.detail === 'string') {
+            errorMessage = data.detail;
+        }
+        throw new Error(errorMessage);
     }
 
     return data;
@@ -228,7 +259,13 @@ export async function forgotPassword(email) {
     const data = await response.json();
 
     if (!response.ok) {
-        throw new Error(data.detail || 'Failed to request password reset');
+        let errorMessage = 'Failed to request password reset';
+        if (Array.isArray(data.detail)) {
+            errorMessage = data.detail[0]?.msg || errorMessage;
+        } else if (typeof data.detail === 'string') {
+            errorMessage = data.detail;
+        }
+        throw new Error(errorMessage);
     }
 
     return data;
@@ -254,7 +291,13 @@ export async function resetPassword(email, resetToken, newPassword, confirmNewPa
     const data = await response.json();
 
     if (!response.ok) {
-        throw new Error(data.detail || 'Failed to reset password');
+        let errorMessage = 'Failed to reset password';
+        if (Array.isArray(data.detail)) {
+            errorMessage = data.detail[0]?.msg || errorMessage;
+        } else if (typeof data.detail === 'string') {
+            errorMessage = data.detail;
+        }
+        throw new Error(errorMessage);
     }
 
     return data;

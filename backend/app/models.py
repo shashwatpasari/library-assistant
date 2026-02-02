@@ -59,6 +59,14 @@ class Book(Base):
     image: Mapped[str | None] = mapped_column(String(512), nullable=True)  # Image URL from API
     image_original: Mapped[str | None] = mapped_column(String(512), nullable=True)  # Original image URL from API
     embedding: Mapped[list[float] | None] = mapped_column(Vector(384), nullable=True) # Vector embedding for semantic search
+    
+    # AI-enriched metadata fields
+    pacing: Mapped[str | None] = mapped_column(String(32), nullable=True)  # Fast, Medium, Slow
+    tone: Mapped[str | None] = mapped_column(String(64), nullable=True)  # Dark, Lighthearted, Suspenseful, etc.
+    mood_tags: Mapped[list | None] = mapped_column(JSON, nullable=True)  # ["cozy", "tense", "romantic"]
+    themes: Mapped[list | None] = mapped_column(JSON, nullable=True)  # ["redemption", "survival", "found family"]
+    content_warnings: Mapped[list | None] = mapped_column(JSON, nullable=True)  # ["violence", "explicit language"]
+    enrichment_status: Mapped[str | None] = mapped_column(String(16), nullable=True)  # pending, done, failed
 
     copies: Mapped[list["BookCopy"]] = relationship(
         back_populates="book", cascade="all, delete-orphan"
@@ -116,8 +124,13 @@ class UserPreference(Base):
     
     # Core Preferences
     favorite_genres: Mapped[list[str]] = mapped_column(JSON, default=list) # e.g. ["Sci-Fi", "Thriller"]
-    pacing_preference: Mapped[str | None] = mapped_column(String(32), nullable=True) # e.g. "Fast", "Slow"
+    pacing_preference: Mapped[str | None] = mapped_column(String(32), nullable=True) # e.g. "Fast", "Slow" (legacy)
+    pacing_preferences: Mapped[list[str]] = mapped_column(JSON, default=list) # e.g. ["Fast", "Slow", "Moderate"]
     tone_preference: Mapped[str | None] = mapped_column(String(32), nullable=True) # e.g. "Dark", "Light"
+    
+    # New enriched preferences (themes and moods from AI enrichment)
+    preferred_themes: Mapped[list[str]] = mapped_column(JSON, default=list)  # e.g. ["redemption", "survival"]
+    preferred_moods: Mapped[list[str]] = mapped_column(JSON, default=list)   # e.g. ["cozy", "tense"]
     
     # Constraints & Dealbreakers
     triggers_to_avoid: Mapped[list[str]] = mapped_column(JSON, default=list)

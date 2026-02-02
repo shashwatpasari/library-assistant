@@ -27,25 +27,51 @@ backend/library.db
 # Docker
 docker-compose.override.yml
 
-# Backend Scripts
-# Ignore everything in scripts
-backend/scripts/*
-# But keep these specific files
-!backend/scripts/extract_goodreads_list.py
-!backend/scripts/import_goodreads_csv.py
-!backend/scripts/migrate_to_postgres.py
-!backend/scripts/goodreads_list_books_sample.csv
-!backend/scripts/__init__.py
-
-# Documentation
-docs/
-backend/docs/
-
-# Large data files in scripts
+# ===========================================
+# Backend Scripts - Data Files (IGNORE)
+# ===========================================
+# Large data files that shouldn't be in git
 backend/scripts/*.csv
-!backend/scripts/goodreads_list_books_sample.csv
 backend/scripts/*.zip
 backend/scripts/*.ipynb
+backend/scripts/*.json
+
+# Keep sample CSV for reference
+!backend/scripts/goodreads_list_books_sample.csv
+
+# ===========================================
+# Backend Scripts - Python Files (KEEP)
+# ===========================================
+# These are the utility scripts we want to keep:
+# - extract_goodreads_list.py: Scrapes book data from Goodreads lists
+# - import_goodreads_csv.py: Imports books from CSV to database
+# - migrate_to_postgres.py: Migrates SQLite to PostgreSQL
+# - enrich_books.py: Enriches books with Gemini API
+# - offline_enrich.py: Offline book enrichment
+# - import_enriched_csv.py: Imports enriched book data
+# - reembed_books.py: Regenerates embeddings for books
+# - seed_books.py: Seeds initial book data
+# - export_books.py: Exports books to file
+
+# ===========================================
+# Backend Root - Data Files (IGNORE)
+# ===========================================
+backend/books_to_enrich.json
+backend/enriched_books.json
+
+# ===========================================
+# Temporary/Debug Scripts (IGNORE)
+# ===========================================
+backend/scripts/delete_users.py
+backend/scripts/test_workflow.py
+backend/scripts/list_models.py
+backend/scripts/extract_goodreads.py
+backend/scripts/enrich_isbn_from_csv.py
+backend/scripts/import_results.py
+
+# Documentation (optional)
+docs/
+backend/docs/
 
 # Frontend scratch/dev directories
 frontend/stitch_book_details_and_chat/

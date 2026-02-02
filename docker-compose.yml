@@ -10,6 +10,31 @@ services:
     ports:
       - "5432:5432"
     restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-user} -d ${POSTGRES_DB:-library_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  ollama:
+    image: ollama/ollama:latest
+    volumes:
+      - ollama_data:/root/.ollama
+    ports:
+      - "11434:11434"
+    restart: always
+    # Pull the smaller 3B model on first startup
+    entrypoint: ["/bin/sh", "-c", "ollama serve & sleep 5 && ollama pull qwen2.5:3b-instruct && wait"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 8G
 
   backend:
     build: ./backend
@@ -19,9 +44,8 @@ services:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-user}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-library_db}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY:?JWT_SECRET_KEY is required}
       - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000}
-      # If you are running Ollama on your host machine (Mac), use host.docker.internal
-      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
-      - OLLAMA_MODEL=${OLLAMA_MODEL:-qwen2.5:7b-instruct}
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-qwen2.5:3b-instruct}
       # Email configuration
       - SMTP_HOST=${SMTP_HOST:-}
       - SMTP_PORT=${SMTP_PORT:-587}
@@ -30,12 +54,11 @@ services:
       - FROM_EMAIL=${FROM_EMAIL:-}
       - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
     depends_on:
-      - db
-    volumes:
-      # Mount source code for hot reloading during development (optional)
-      - ./backend:/app
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+      db:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
+    restart: always
 
   frontend:
     build: ./frontend
@@ -43,6 +66,8 @@ services:
       - "3000:80"
     depends_on:
       - backend
+    restart: always
 
 volumes:
   postgres_data:
+  ollama_data:

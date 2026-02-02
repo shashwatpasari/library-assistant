@@ -56,31 +56,38 @@
         .search-container #search-input,
         .search-container #search-input:hover,
         .search-container #search-input:focus {
-            border-width: 1.5px;              /* EXACT same thickness always */
-            border-color: #e5e7eb;            /* default gray-200 */
+            border-width: 1.5px;
+            /* EXACT same thickness always */
+            border-color: #e5e7eb;
+            /* default gray-200 */
             outline: none;
-            box-shadow: none;                 /* kill any focus ring from Tailwind/forms */
+            box-shadow: none;
+            /* kill any focus ring from Tailwind/forms */
             transition: border-color 150ms ease;
         }
 
         .search-container #search-dropdown {
             border-width: 1.5px;
-            border-color: #e5e7eb;            /* default gray-200 */
+            border-color: #e5e7eb;
+            /* default gray-200 */
         }
 
         /* Hover (only when not focused): lighter blue */
         .search-container:hover #search-input:not(:focus) {
-            border-color: #93c5fd;            /* blue-300 */
+            border-color: #93c5fd;
+            /* blue-300 */
         }
 
         /* Focus (clicked): deeper blue on bar and results, overrides hover completely */
         .search-container:focus-within #search-input,
         .search-container:focus-within #search-input:hover {
-            border-color: #2563eb;            /* deep blue */
+            border-color: #2563eb;
+            /* deep blue */
         }
 
         .search-container:focus-within #search-dropdown {
-            border-color: #2563eb;            /* match deep blue */
+            border-color: #2563eb;
+            /* match deep blue */
         }
 
         /* Placeholder text uses heading font, typed text uses body font */
@@ -110,8 +117,7 @@
                     <h1
                         class="font-heading text-4xl lg:text-[2.6rem] font-normal leading-snug tracking-tight text-primary dark:text-white mb-4">
                         Welcome to LibraryHub</h1>
-                    <p
-                        class="text-lg lg:text-xl text-text-light dark:text-text-dark max-w-4xl mx-auto leading-relaxed">
+                    <p class="text-lg lg:text-xl text-text-light dark:text-text-dark max-w-4xl mx-auto leading-relaxed">
                         Your gateway to a world of knowledge and adventure. Discover new stories, revisit old classics,
                         and connect with a community of readers.
                     </p>
@@ -143,6 +149,8 @@
         import { renderHeader, initHeader } from './src/components/header.js';
         import { renderChatWidget, initChatWidget } from './src/components/chat-widget.js';
 
+        const API_BASE = 'http://localhost:8000';
+
         // Initialize header
         document.getElementById('header-container').innerHTML = renderHeader();
         initHeader();
@@ -163,25 +171,29 @@
             return shuffled;
         }
 
-        async function loadFeaturedBooks() {
-            const container = document.getElementById('featured-books');
-            if (!container) return;
+        /**
+         * Fetch personalized recommendations for logged-in users
+         */
+        async function fetchRecommendations(token) {
+            const res = await fetch(`${API_BASE}/users/me/recommendations?limit=20`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            if (!res.ok) throw new Error('Failed to fetch recommendations');
+            return await res.json();
+        }
 
-            try {
-                // Fetch a larger sample of books to randomize from
-                const allBooks = await fetchBooks({ skip: 0, limit: 100 });
+        /**
+         * Render a grid of book cards
+         */
+        function renderBookCards(books, container) {
+            container.innerHTML = books.map((book, index) => {
+                const coverUrl = getBookCoverUrl(book);
+                const fetchPriority = index < 3 ? 'high' : 'auto';
+                const loading = index < 3 ? 'eager' : 'lazy';
 
-                // Randomly shuffle and select 10 books
-                const shuffledBooks = shuffleArray(allBooks);
-                const featuredBooks = shuffledBooks.slice(0, 10);
-
-                container.innerHTML = featuredBooks.map((book, index) => {
-                    const coverUrl = getBookCoverUrl(book);
-                    // First 3 images should load with high priority (above the fold)
-                    const fetchPriority = index < 3 ? 'high' : 'auto';
-                    const loading = index < 3 ? 'eager' : 'lazy';
-
-                    return `
+                return `
             <div class="flex flex-col gap-3 group">
                 <a href="book-details.html?id=${book.id}" class="w-full aspect-[2/3] rounded-lg overflow-hidden shadow-md group-hover:shadow-xl transition-shadow bg-gray-200 dark:bg-gray-700 relative">
                     <div class="absolute inset-0 flex items-center justify-center bg-gray-200 dark:bg-gray-700 animate-pulse">
@@ -204,7 +216,39 @@
                 </div>
             </div>
         `;
-                }).join('');
+            }).join('');
+        }
+
+        async function loadFeaturedBooks() {
+            const container = document.getElementById('featured-books');
+            const sectionTitle = document.querySelector('section:last-of-type h2');
+            if (!container) return;
+
+            const token = localStorage.getItem('auth_token');
+
+            try {
+                let books;
+
+                if (token) {
+                    // Logged in → show personalized recommendations
+                    try {
+                        books = await fetchRecommendations(token);
+                        if (sectionTitle) {
+                            sectionTitle.textContent = 'Recommended For You';
+                        }
+                    } catch (e) {
+                        // Fallback if recommendations fail
+                        console.warn('Recommendations failed, falling back to random:', e);
+                        const allBooks = await fetchBooks({ skip: 0, limit: 100 });
+                        books = shuffleArray(allBooks).slice(0, 10);
+                    }
+                } else {
+                    // Not logged in → show random books
+                    const allBooks = await fetchBooks({ skip: 0, limit: 100 });
+                    books = shuffleArray(allBooks).slice(0, 10);
+                }
+
+                renderBookCards(books, container);
             } catch (error) {
                 console.error('Error loading books:', error);
                 container.innerHTML = '<p class="text-red-500">Error loading books. Make sure the backend is running.</p>';

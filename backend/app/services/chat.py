@@ -2,7 +2,8 @@
 RAG Chat service using Ollama for LLM and pgvector for retrieval.
 """
 import httpx
-from sqlalchemy import select
+import json
+from sqlalchemy import select, String
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
@@ -10,6 +11,55 @@ from app.config import OLLAMA_BASE_URL, OLLAMA_MODEL
 from app.models import Book, BookCopy
 from app.services.embedding import generate_embedding
 from app.services.books import get_book_availability
+from app.services.recommendations import get_personalized_recommendations
+
+
+async def detect_query_intent(query: str) -> dict:
+    """Detect the intent of a user query: generic, similarity, or filtered.
+    
+    Returns:
+        {"intent": "generic" | "similarity" | "filtered", "target_book": str | null}
+    """
+    system_prompt = """You are a query intent classifier for a library assistant.
+    Classify the user's query into one of these intents:
+    
+    1. "generic" - User wants general recommendations based on their preferences
+       Examples: "recommend some books", "what should I read", "give me 5 books", "suggest something"
+    
+    2. "similarity" - User wants books similar to a specific book or author
+       Examples: "books like The Martian", "similar to Stephen King", "more like Harry Potter"
+    
+    3. "filtered" - User specifies criteria (genre, pacing, themes, etc.)
+       Examples: "fast-paced thrillers", "romance with happy ending", "dark fantasy books"
+    
+    Return ONLY a JSON object:
+    {"intent": "generic" | "similarity" | "filtered", "target_book": "book name if similarity, else null"}
+    
+    Examples:
+    - "recommend 5 books" → {"intent": "generic", "target_book": null}
+    - "books like The Kite Runner" → {"intent": "similarity", "target_book": "The Kite Runner"}
+    - "fast-paced sci-fi" → {"intent": "filtered", "target_book": null}
+    """
+    
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.post(
+                f"{OLLAMA_BASE_URL}/api/generate",
+                json={
+                    "model": OLLAMA_MODEL,
+                    "prompt": f"Query: {query}\nJSON:",
+                    "system": system_prompt,
+                    "stream": False,
+                    "format": "json"
+                }
+            )
+            if response.status_code == 200:
+                return json.loads(response.json()["response"])
+    except Exception as e:
+        print(f"Error detecting intent: {e}")
+    
+    # Default to filtered (safest fallback - will use vector search)
+    return {"intent": "filtered", "target_book": None}
 
 
 async def extract_search_filters(query: str) -> dict:
@@ -25,9 +75,13 @@ async def extract_search_filters(query: str) -> dict:
     - year_start: int (published after X)
     - year_end: int (published before X)
     - language: str (e.g. English, French)
+    - pacing: str ("Fast", "Slow", or "Moderate" - if user mentions fast-paced, slow-burn, etc.)
+    - tone: str ("Dark", "Light", "Emotional" - if user mentions dark, gritty, fun, emotional, etc.)
+    - themes: list[str] (themes like "love", "revenge", "survival", "redemption", etc.)
+    - moods: list[str] (moods like "tense", "cozy", "adventurous", "romantic", etc.)
     
-    Example: "sci-fi books under 300 pages from 2020"
-    Output: {"search_query": "sci-fi", "max_pages": 300, "min_pages": null, "genre": "sci-fi", "year_start": 2020, "year_end": null, "language": null}
+    Example: "fast-paced sci-fi books about revenge"
+    Output: {"search_query": "sci-fi revenge", "pacing": "Fast", "themes": ["revenge"], "genre": "sci-fi", "max_pages": null, "min_pages": null, "year_start": null, "year_end": null, "language": null, "tone": null, "moods": null}
     """
     
     try:
@@ -76,6 +130,18 @@ def retrieve_relevant_books(session: Session, query: str, filters: dict = None, 
              stmt = stmt.where(Book.date_published >= str(filters["year_start"]))
         if filters.get("year_end"):
              stmt = stmt.where(Book.date_published <= str(filters["year_end"]))
+        
+        # Enriched field filters (pacing, tone, themes, moods)
+        if filters.get("pacing"):
+            stmt = stmt.where(Book.pacing.ilike(f"%{filters['pacing']}%"))
+        if filters.get("tone"):
+            stmt = stmt.where(Book.tone.ilike(f"%{filters['tone']}%"))
+        if filters.get("themes"):
+            for theme in filters["themes"]:
+                stmt = stmt.where(Book.themes.cast(String).ilike(f"%{theme}%"))
+        if filters.get("moods"):
+            for mood in filters["moods"]:
+                stmt = stmt.where(Book.mood_tags.cast(String).ilike(f"%{mood}%"))
 
     # Add Vector Similarity Order
     stmt = stmt.order_by(Book.embedding.cosine_distance(query_embedding)).limit(limit)
@@ -102,6 +168,15 @@ def build_context(session: Session, books: list[Book]) -> str:
         # Truncate synopsis to avoid token limits (approx 300 chars)
         synopsis_preview = (book.synopsis[:300] + "...") if book.synopsis else (book.description[:300] + "..." if book.description else "No description.")
         context += f"   (Genre: {book.genres}, Pages: {book.pages}, Year: {book.date_published})\n"
+        
+        # Add AI-enriched metadata if available
+        if book.pacing:
+            context += f"   (Pacing: {book.pacing}, Tone: {book.tone})\n"
+        if book.themes:
+            # Flatten themes list if it's a list (it is JSON)
+            themes_str = ", ".join(book.themes) if isinstance(book.themes, list) else str(book.themes)
+            context += f"   (Themes: {themes_str})\n"
+            
         context += f"   (Subjects: {book.subjects})\n"
         context += f"   (Synopsis: {synopsis_preview})\n"
         
@@ -208,13 +283,29 @@ PERSONALIZATION INSTRUCTIONS:
     if cached_context and not should_retrieve_new_books(latest_query, conversation):
         context = cached_context
         search_filters = {}
+        query_intent = {"intent": "cached"}
     else:
-        # Step 1: Extract Filters (LLM Call)
-        search_filters = await extract_search_filters(latest_query)
+        # Step 1: Detect Query Intent (LLM Call)
+        query_intent = await detect_query_intent(latest_query)
+        print(f"[Chat] Query intent: {query_intent}")
         
-        # Step 2: Hybrid Search (Vector + SQL)
-        # TODO: We could inject user preferences (like disliked genres) into SQL filters here
-        books = retrieve_relevant_books(session, latest_query, filters=search_filters, limit=book_limit)
+        if query_intent.get("intent") == "generic" and user:
+            # Generic recommendation → Use user preferences
+            print(f"[Chat] Using preference-based recommendations for user {user.id}")
+            books = get_personalized_recommendations(session, user.id, limit=book_limit)
+            search_filters = {"source": "preferences"}
+            
+        elif query_intent.get("intent") == "similarity":
+            # Similarity query → Vector search on target book
+            target_book = query_intent.get("target_book", latest_query)
+            search_filters = {"similarity_target": target_book}
+            books = retrieve_relevant_books(session, target_book, filters=None, limit=book_limit)
+            
+        else:
+            # Filtered query → Extract filters + Hybrid Search
+            search_filters = await extract_search_filters(latest_query)
+            books = retrieve_relevant_books(session, latest_query, filters=search_filters, limit=book_limit)
+        
         context = build_context(session, books)
     
     # Build map of available books for fast lookup by ID
@@ -235,25 +326,39 @@ PERSONALIZATION INSTRUCTIONS:
     {context}
     
     CORE BEHAVIORS:
-    1. **Smart Follow-up**: If the user's request is broad (e.g., "mystery books"), provide initial recommendations BUT append a smart, playful follow-up question to narrow it down (e.g., "Do you prefer cozy mysteries or hard-boiled thrillers?").
+    1. **Smart Follow-up**: ALWAYS end your response with a follow-up question to keep the conversation going (e.g., "Would you like more recommendations like these?" or "Do you prefer faster or slower pacing?").
     2. **Compare Mode**: If the user asks to compare specific books, use the provided book data to contrast them (Pacing, Tone, Themes).
     
-    FORMATTING RULES for Recommendations:
-    1. **Number your list** (1., 2., 3.).
-    2. Format exactly: **1. Title** by Author
-    3. Follow with a 1-2 sentence explanation explaining WHY it fits.
-    4. End the item with `BID[id]` to attach the book card.
+    RESPONSE STRUCTURE for Recommendations:
+    1. Start with a brief OPENING sentence (e.g., "Here are some books you might enjoy:" or "Based on your preferences, I found these:").
+    2. List ALL books from the Available Books section in a numbered format.
+    3. End with a CLOSING sentence and a follow-up question.
     
-    Example Layout:
+    FORMATTING RULES for the Book List:
+    1. **RECOMMEND ALL BOOKS** provided in the Available Books section above. Do not skip any.
+    2. **Number your list** (1., 2., 3., etc.).
+    3. Format exactly: **1. Title** by Author
+    4. Follow with a 1-2 sentence explanation explaining WHY it fits.
+    5. End EACH item with `BID[id]` where id is the book's ID from the BOOK[id|...] data.
+    
+    Example Response:
+    
+    Here are some great mystery books for you:
     
     1. **The Martian** by Andy Weir
        A fast-paced survival story perfect for your sci-fi craving. BID[123]
        
     2. **Project Hail Mary** by Andy Weir
        Similar tone but with more emotional depth. BID[456]
+    
+    I hope you find something you love! Would you like me to suggest books with a specific theme or mood?
        
     CRITICAL INSTRUCTIONS:
+    - **ALWAYS** start with an opening sentence before the list.
+    - **ALWAYS** recommend ALL books from the Available Books list.
     - **ALWAYS** use bold for the **Title**.
+    - **ALWAYS** include `BID[id]` at the end of EACH book entry.
+    - **ALWAYS** end with a closing sentence and follow-up question.
     - **ALWAYS** ensure double line breaks between list items.
     - **NEVER** output the full BOOK[...] tag. Use **ONLY** `BID[id]`.
     """
@@ -279,7 +384,7 @@ PERSONALIZATION INSTRUCTIONS:
             }
         ) as response:
             buffer = ""
-            collected_ids = set()
+            collected_ids = []  # Use list to preserve order
             
             async for line in response.aiter_lines():
                 if line:
@@ -305,7 +410,9 @@ PERSONALIZATION INSTRUCTIONS:
                                 # Extract ID
                                 bid_content = buffer[start_idx+4:end_idx]
                                 if bid_content.isdigit():
-                                    collected_ids.add(int(bid_content))
+                                    bid_int = int(bid_content)
+                                    if bid_int not in collected_ids:
+                                        collected_ids.append(bid_int)
                                 
                                 # Remove processed part from buffer
                                 buffer = buffer[end_idx+1:]
@@ -323,17 +430,29 @@ PERSONALIZATION INSTRUCTIONS:
                 yield buffer
 
             # End of stream: Append Book Cards Data
-            # End of stream: Append Book Cards Data
-            if collected_ids:
+            # Use collected BID tags if available, otherwise fall back to all retrieved books
+            if collected_ids or books_map:
                 import json
                 cards_data = []
-                for bid in collected_ids:
-                    b = books_map.get(bid)
-                    if not b:
-                        # Fetch from DB if not in current search results (e.g. from cached context)
-                        b = session.get(Book, bid)
-                    
-                    if b:
+                
+                # If LLM outputted BID tags, use those (maintains consistency with text)
+                if collected_ids:
+                    for bid in collected_ids:
+                        b = books_map.get(bid)
+                        if not b:
+                            b = session.get(Book, bid)
+                        if b:
+                            avail = get_book_availability(session, book_id=b.id)
+                            cards_data.append({
+                                "id": b.id,
+                                "title": b.title,
+                                "author": b.author,
+                                "cover": b.cover_image_url or b.image or "",
+                                "availability": f"{avail.available_copies}/{avail.total_copies} available"
+                            })
+                else:
+                    # Fallback: show all retrieved books if no BIDs detected
+                    for b in books_map.values():
                         avail = get_book_availability(session, book_id=b.id)
                         cards_data.append({
                             "id": b.id,
@@ -344,4 +463,4 @@ PERSONALIZATION INSTRUCTIONS:
                         })
                 
                 if cards_data:
-                    yield f"\n\n__JSON_START__\n{json.dumps(cards_data)}"
+                    yield f"\n\n__JSON_START__{json.dumps(cards_data)}"

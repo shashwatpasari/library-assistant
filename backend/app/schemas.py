@@ -197,8 +197,11 @@ class SavedBookRead(BaseModel):
 class UserPreferenceBase(BaseModel):
     """Base schema for user preferences."""
     favorite_genres: list[str] = Field(default=[], description="List of favorite genres")
-    pacing_preference: Optional[str] = Field(default=None, description="Preferred pacing (Fast, Slow, etc)")
+    pacing_preference: Optional[str] = Field(default=None, description="Preferred pacing (Fast, Slow, etc) - legacy single value")
+    pacing_preferences: list[str] = Field(default=[], description="List of preferred pacing options")
     tone_preference: Optional[str] = Field(default=None, description="Preferred tone (Dark, Light, etc)")
+    preferred_themes: list[str] = Field(default=[], description="Preferred themes (redemption, survival, etc)")
+    preferred_moods: list[str] = Field(default=[], description="Preferred moods (cozy, tense, romantic, etc)")
     triggers_to_avoid: list[str] = Field(default=[], description="List of triggers/content to avoid")
     disliked_genres: list[str] = Field(default=[], description="List of disliked genres")
     reading_goals: dict = Field(default={}, description="Reading goals object")
