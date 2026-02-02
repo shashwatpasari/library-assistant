@@ -7,17 +7,24 @@ WORKDIR /app
 
 # Install system dependencies
 # libpq-dev is required for psycopg2 to compile
-# gcc is often needed for compiling other python extensions
+# gcc, g++ are needed for compiling python extensions
+# Additional deps for sentence-transformers/torch
 RUN apt-get update && apt-get install -y \
     gcc \
+    g++ \
     libpq-dev \
+    libffi-dev \
     && rm -rf /var/lib/apt/lists/*
+
+# Upgrade pip
+RUN pip install --upgrade pip
 
 # Copy the requirements file into the container at /app
 COPY requirements.txt .
 
 # Install any needed packages specified in requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+# Use increased timeout for large packages like torch
+RUN pip install --no-cache-dir --timeout 300 -r requirements.txt
 
 # Copy the rest of the application code
 COPY . .
