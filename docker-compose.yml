@@ -37,8 +37,9 @@ services:
 
   backend:
     build: ./backend
-    ports:
-      - "8000:8000"
+    # Port 8000 is NOT exposed publicly - accessed via nginx reverse proxy
+    expose:
+      - "8000"
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-user}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-library_db}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY:?JWT_SECRET_KEY is required}

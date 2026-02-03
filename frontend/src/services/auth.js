@@ -3,6 +3,8 @@
  */
 
 // Dynamically determine API URL based on current location
+// In production: use /api prefix (nginx reverse proxy)
+// In development: use localhost:8000 directly
 function getApiBaseUrl() {
     if (window.API_BASE_URL) {
         return window.API_BASE_URL;
@@ -10,13 +12,13 @@ function getApiBaseUrl() {
 
     const hostname = window.location.hostname;
 
-    // If on localhost, use localhost backend
+    // If on localhost, use localhost backend directly
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
         return 'http://localhost:8000';
     }
 
-    // In production, use same host with port 8000
-    return `http://${hostname}:8000`;
+    // In production, use /api prefix (nginx proxies to backend)
+    return '/api';
 }
 
 const API_BASE_URL = getApiBaseUrl();
