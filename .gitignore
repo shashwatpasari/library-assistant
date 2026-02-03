@@ -79,3 +79,4 @@ frontend/stitch_book_details_and_chat/
 # Markdown files in subdirectories (keep only root README.md)
 frontend/*.md
 backend/docs/*.md
+*.sql
