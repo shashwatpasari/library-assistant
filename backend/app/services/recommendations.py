@@ -5,6 +5,7 @@ Uses user preferences (genres, pacing, tone, themes, moods) to find matching boo
 """
 
 from sqlalchemy import select, or_, and_, func, text, case, String
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Session
 from typing import Optional
 
@@ -121,7 +122,7 @@ def get_available_themes(session: Session, limit: int = 30) -> list[str]:
     # Query themes from all books
     books_with_themes = session.query(Book.themes).filter(
         Book.themes.isnot(None),
-        func.jsonb_array_length(Book.themes) > 0
+        func.jsonb_array_length(Book.themes.cast(JSONB)) > 0
     ).all()
     
     # Count frequency of each theme
@@ -143,7 +144,7 @@ def get_available_moods(session: Session, limit: int = 30) -> list[str]:
     # Query moods from all books
     books_with_moods = session.query(Book.mood_tags).filter(
         Book.mood_tags.isnot(None),
-        func.jsonb_array_length(Book.mood_tags) > 0
+        func.jsonb_array_length(Book.mood_tags.cast(JSONB)) > 0
     ).all()
     
     # Count frequency of each mood

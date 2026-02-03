@@ -1,98 +1,213 @@
-# 📚 Library Assistant with AI
+# 📚 Library Assistant
 
-A modern library discovery platform featuring an intelligent AI assistant for personalized book recommendations.
+> **An intelligent book discovery platform that transforms how you find your next read.**
 
-**Key Tech**: Python FastAPI, React (Vite MPA), PostgreSQL (pgvector), Docker.
+Traditional library catalogs rely on keyword searches and rigid filters—but readers often don't know exactly what they want. They know a *feeling*: "something like The Alchemist but more philosophical" or "a cozy mystery for a rainy weekend."
 
-[![Deployed on Render](https://img.shields.io/badge/Render-Deployed-46E3B7?style=for-the-badge&logo=render&logoColor=white)](https://library-assistant.onrender.com)
-*(Replace the link above with your actual Render URL)*
+**Library Assistant** solves this by combining **semantic vector search** with a **conversational AI chatbot** powered by RAG (Retrieval-Augmented Generation). Instead of browsing endless catalogs, users simply *describe* what they're looking for, and the AI understands context, mood, and themes to deliver personalized recommendations.
 
-## 🚀 Live Demo
+### Key Highlights
 
-**[View the Live Application on Render](https://library-assistant.onrender.com)**
+- 🧠 **RAG-Powered Chatbot** — Understands natural language queries and retrieves contextually relevant books before generating responses
+- 🔍 **Semantic Search** — Uses 384-dimensional embeddings to find books by meaning, not just keywords
+- ⚡ **Streaming Responses** — Real-time token streaming for instant feedback
+- 🎯 **Personalization** — Learns preferences through onboarding and liked books
+- 🐳 **Production-Ready** — Fully containerized with automated CI/CD deployment
 
-## 🎥 Video Demo
+[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-Visit_Site-blue?style=for-the-badge)](http://YOUR_IP_HERE:3000)
+[![GitHub Actions](https://img.shields.io/badge/CI%2FCD-GitHub_Actions-2088FF?style=for-the-badge&logo=github-actions&logoColor=white)](https://github.com/shashwatpasari/library-assistant/actions)
 
-[![Watch the Demo](https://img.youtube.com/vi/YOUR_VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=YOUR_VIDEO_ID)
-*(Link your demo video here)*
+---
 
-## 🚀 Overview
+## 🎬 Demo
 
-Library Assistant transforms the traditional library catalog into a conversational experience. It uses **Retrieval-Augmented Generation (RAG)** to understand the semantic context of user queries, allowing for nuanced book discovery beyond simple keyword matching.
+### Live Application
+🔗 **[http://YOUR_IP_HERE:3000](http://YOUR_IP_HERE:3000)**
 
-For example, asking *"I want a book that explores the concept of memory like 'The Giver' but darker"* triggers a vector search to find conceptually similar books, which the AI then evaluates and recommends.
+### Video Walkthrough
+<!-- Add your video link here -->
+[![Watch Demo](https://img.shields.io/badge/▶_Watch_Demo-YouTube-red?style=for-the-badge&logo=youtube)](https://youtube.com/watch?v=YOUR_VIDEO_ID)
 
-## 📊 Data Collection
+<!-- Or embed a GIF -->
+<!-- ![Demo GIF](docs/demo.gif) -->
 
-The comprehensive book dataset for this application was curated from **Goodreads.com**.
+---
 
-1.  **Extraction**: We used custom Python scripts (included in `backend/scripts/extract_goodreads_list.py`) to scrape book data, including titles, authors, genres, and detailed summaries.
-2.  **Processing**: The raw data was compiled into a structured CSV format. A sample of this structure is available at [`backend/scripts/goodreads_list_books_sample.csv`](backend/scripts/goodreads_list_books_sample.csv).
-3.  **Ingestion**: This CSV data was then enriched and imported into our **PostgreSQL** database, where embedding vectors were generated for each book's description to enable semantic search.
+## 🧠 How It Works
+
+The chatbot uses **RAG (Retrieval-Augmented Generation)** to understand queries like:
+- *"Suggest something like Harry Potter but darker"*
+- *"Fast-paced thriller for a beach read"*
+- *"Books about AI and consciousness"*
+
+### RAG Pipeline
+
+```
+User Query → Embedding → Vector Search (pgvector) → Context Injection → LLM Response
+```
+
+1. **Embed**: Query converted to 384-dim vector using `sentence-transformers/all-MiniLM-L6-v2`
+2. **Retrieve**: pgvector finds semantically similar books from 8,000 embeddings
+3. **Generate**: Qwen 2.5 LLM generates personalized recommendations with retrieved context
+
+---
+
+## ✨ Features
+
+| Feature | Description |
+|---------|-------------|
+| 🤖 **AI Chatbot** | Natural language book recommendations with streaming responses |
+| 🔍 **Semantic Search** | Find books by vibe, mood, or theme—not just keywords |
+| 📚 **8,000 Books** | Comprehensive catalog with covers, ratings, and synopses |
+| ❤️ **Personal Library** | Like, borrow, and organize your reading list |
+| 🎯 **Preference Learning** | Onboarding flow tailors recommendations to your taste |
+| 🔐 **Secure Auth** | JWT authentication with email verification |
+| ⚡ **Real-time Streaming** | See AI responses as they're generated |
+
+---
 
 ## 🏗️ Architecture
 
-The application follows a containerized, service-oriented architecture:
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                         NGINX (Port 3000)                        │
+│                    Reverse Proxy + Static Files                  │
+├─────────────────────────────────────────────────────────────────┤
+│                              │                                   │
+│    ┌──────────────────┐     │     ┌──────────────────────┐      │
+│    │     Frontend     │     │     │      Backend API     │      │
+│    │   (Vite + JS)    │ ◄───┼───► │      (FastAPI)       │      │
+│    └──────────────────┘     │     └──────────────────────┘      │
+│                              │              │                    │
+│                              │              ▼                    │
+│                    ┌─────────┴─────────────────────────┐        │
+│                    │                                    │        │
+│         ┌──────────▼──────────┐    ┌──────────────────▼─┐       │
+│         │     PostgreSQL      │    │       Ollama       │       │
+│         │   + pgvector        │    │    (Qwen 2.5)      │       │
+│         │   (Embeddings)      │    │                    │       │
+│         └─────────────────────┘    └────────────────────┘       │
+└─────────────────────────────────────────────────────────────────┘
+```
 
-### **1. AI & Data Layer**
--   **Vector Database**: **PostgreSQL** with the `pgvector` extension stores 384-dimensional embeddings of book content.
--   **LLM Inference**: Uses **Ollama** running the `qwen2.5:7b-instruct` model (configurable) for generating natural language responses.
--   **RAG Pipeline**:
-    1.  **Embed**: User query is converted to a vector using `sentence-transformers/all-MiniLM-L6-v2`.
-    2.  **Retrieve**: `pgvector` finds the most semantically similar books.
-    3.  **Generate**: Retrieved context is fed to Qwen 2.5 to generate a helpful, accurate response.
-
-### **2. Backend (FastAPI)**
--   Provides RESTful endpoints for book management and search.
--   Manages streaming chat using Server-Sent Events (SSE) logic.
--   Handles user authentication and session management.
-
-### **3. Frontend (React Multi-Page App)**
--   Built with **Vite** as a Multi-Page Application (MPA) for distinct entry points:
-    -   `index.html`: Home / Landing
-    -   `catalog.html`: Browsing interface
-    -   `book-details.html`: Deep dive into specific titles
-    -   `my-books.html`: User collections
--   Styled with **Tailwind CSS**.
-
-## ✨ Key Features
-
--   **🤖 Intelligent Chat**: Discuss books with an assistant that remembers context and understands intent.
--   **🔍 Semantic Search**: Find books by plot, mood, or "vibe" — not just title/author.
--   **⚡ Real-Time Availability**: See live copy availability for every book.
--   **📱 Modern UI**: Clean, responsive interface optimized for all devices.
--   **🐳 Fully Containerized**: The entire stack (Frontend, Backend, Database) runs in Docker.
+---
 
 ## 🛠️ Tech Stack
 
-| Component | Technology |
-| :--- | :--- |
-| **Frontend** | React 18, Vite (MPA), Tailwind CSS |
-| **Backend** | Python 3.11, FastAPI, SQLModel |
-| **Database** | PostgreSQL 16 + `pgvector` |
-| **AI / LLM** | Ollama (Qwen 2.5), Sentence Transformers |
-| **Hosting**  | **Render** (Dockerized Web Service) |
+| Layer | Technology |
+|-------|------------|
+| **Frontend** | Vite, JavaScript, Tailwind CSS |
+| **Backend** | Python 3.11, FastAPI, SQLAlchemy |
+| **Database** | PostgreSQL 16 + pgvector |
+| **AI/ML** | Qwen 2.5 LLM, Sentence Transformers |
+| **Embeddings** | all-MiniLM-L6-v2 (384 dimensions) |
+| **Infrastructure** | Docker Compose, Nginx, GCP Compute Engine |
+| **CI/CD** | GitHub Actions |
+
+---
 
 ## 📸 Screenshots
 
-| AI Chat Interface | Book Details |
-|:---:|:---:|
-| ![Chat Interface](docs/chat_placeholder.png) | ![Book Details](docs/details_placeholder.png) |
-| *Get personalized recommendations* | *View deep metadata and reviews* |
+<!-- Add your screenshots here -->
 
-## 🚀 Local Quick Start
+| Home Page | Catalog | AI Chat |
+|:---------:|:-------:|:-------:|
+| ![Home](docs/screenshots/home.png) | ![Catalog](docs/screenshots/catalog.png) | ![Chat](docs/screenshots/chat.png) |
 
-The entire application can be spun up locally using Docker.
+| Book Details | My Books | Onboarding |
+|:------------:|:--------:|:----------:|
+| ![Details](docs/screenshots/details.png) | ![MyBooks](docs/screenshots/mybooks.png) | ![Onboarding](docs/screenshots/onboarding.png) |
+
+---
+
+## 🚀 Quick Start
 
 ### Prerequisites
--   Docker & Docker Compose
--   Ollama running locally (configured for `qwen2.5`)
+- Docker & Docker Compose
+- 8GB+ RAM (for LLM)
 
-### Run the App
+### Run Locally
+
 ```bash
-# 1. Clone the repository
+# Clone the repository
 git clone https://github.com/shashwatpasari/library-assistant.git
+cd library-assistant
 
-# 2. Start all services
-docker-compose up --build
+# Copy environment file
+cp .env.example .env
+# Edit .env and add your secrets (JWT_SECRET_KEY, POSTGRES_PASSWORD)
+
+# Start all services
+docker compose up --build
+
+# Wait for services to start, then pull the LLM model
+docker compose exec ollama ollama pull qwen2.5:3b-instruct
 ```
+
+**Access the app at:** http://localhost:3000
+
+---
+
+## 📁 Project Structure
+
+```
+library-assistant/
+├── frontend/               # Vite frontend (MPA)
+│   ├── src/
+│   │   ├── components/     # Shared components (header, chat-widget)
+│   │   └── services/       # API, auth, user-books services
+│   ├── index.html          # Home page
+│   ├── catalog.html        # Book browsing
+│   ├── book-details.html   # Individual book view
+│   ├── my-books.html       # User's library
+│   └── nginx.conf          # Nginx config with API proxy
+│
+├── backend/                # FastAPI backend
+│   ├── app/
+│   │   ├── api/routes/     # API endpoints
+│   │   ├── models/         # SQLAlchemy models
+│   │   └── services/       # Business logic (chat, embedding, email)
+│   └── scripts/            # Data import utilities
+│
+├── docker-compose.yml      # Service orchestration
+└── .github/workflows/      # CI/CD pipeline
+```
+
+---
+
+## 🔧 Configuration
+
+### Environment Variables
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `POSTGRES_PASSWORD` | Database password | ✅ |
+| `JWT_SECRET_KEY` | JWT signing key | ✅ |
+| `OLLAMA_MODEL` | LLM model name | Default: `qwen2.5:3b-instruct` |
+| `SMTP_HOST` | Email server | Optional |
+| `SMTP_USER` | Email username | Optional |
+| `SMTP_PASSWORD` | Email password | Optional |
+
+---
+
+## 🚢 Deployment
+
+The app is deployed on **GCP Compute Engine** with automated CI/CD:
+
+## 📊 Data
+
+The book dataset includes 8000+ titles sourced from:
+- Goodreads (scraped with custom scripts)
+
+Each book includes: title, authors, genres, synopsis, cover image, ratings, and 384-dimensional embedding vector.
+
+---
+
+## 👤 Author
+
+**Shashwat Pasari**
+
+[![GitHub](https://img.shields.io/badge/GitHub-shashwatpasari-181717?style=flat&logo=github)](https://github.com/shashwatpasari)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=flat&logo=linkedin)](https://linkedin.com/in/shashwatpasari)
+
+

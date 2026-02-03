@@ -14,7 +14,7 @@ export function renderHeader() {
                 <div class="flex items-center gap-8">
                     <a href="index.html" class="flex items-center gap-2 text-text-light dark:text-text-dark hover:opacity-80 transition-opacity">
                         <span class="material-symbols-outlined text-primary text-3xl">local_library</span>
-                        <h2 class="text-xl font-bold tracking-tight">Library</h2>
+                        <h2 class="text-xl font-bold tracking-tight">Library Assistant</h2>
                     </a>
                     <nav class="hidden md:flex items-center gap-6 font-heading">
                         <a class="text-xl font-medium hover:text-primary dark:hover:text-primary transition-colors" href="index.html">Home</a>
@@ -99,7 +99,7 @@ export function renderUserProfile() {
         // Initialize dropdown toggle
         const profileBtn = document.getElementById('user-profile-btn');
         const dropdown = document.getElementById('user-profile-dropdown');
-        
+
         if (profileBtn && dropdown) {
             profileBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -174,7 +174,7 @@ function showSettingsModal(user) {
             </div>
         </div>
     `;
-    
+
     document.body.appendChild(modal);
 
     // Handle close
@@ -241,7 +241,7 @@ function showChangeEmailModal(user) {
             </form>
         </div>
     `;
-    
+
     document.body.appendChild(modal);
 
     // Handle close
@@ -256,9 +256,9 @@ function showChangeEmailModal(user) {
         e.preventDefault();
         const errorDiv = document.getElementById('change-email-error');
         const submitBtn = e.target.querySelector('button[type="submit"]');
-        
+
         errorDiv.classList.add('hidden');
-        
+
         const currentEmail = document.getElementById('current-email').value;
         const newEmail = document.getElementById('new-email').value;
         const confirmNewEmail = document.getElementById('confirm-new-email').value;
@@ -374,7 +374,7 @@ function showChangePasswordModal() {
             </form>
         </div>
     `;
-    
+
     document.body.appendChild(modal);
 
     // Handle close
@@ -448,9 +448,9 @@ function showChangePasswordModal() {
         e.preventDefault();
         const errorDiv = document.getElementById('change-password-error');
         const submitBtn = e.target.querySelector('button[type="submit"]');
-        
+
         errorDiv.classList.add('hidden');
-        
+
         const currentPassword = document.getElementById('current-password').value;
         const newPassword = document.getElementById('new-password').value;
         const confirmNewPassword = document.getElementById('confirm-new-password').value;
