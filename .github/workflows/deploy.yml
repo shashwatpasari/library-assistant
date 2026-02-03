@@ -8,6 +8,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 45  # Overall job timeout
     
     steps:
       - name: Deploy to GCP VM
@@ -16,6 +17,8 @@ jobs:
           host: ${{ secrets.GCP_HOST }}
           username: ${{ secrets.GCP_USERNAME }}
           key: ${{ secrets.GCP_SSH_KEY }}
+          timeout: 30m  # SSH command timeout
+          command_timeout: 30m  # Individual command timeout
           script: |
             cd ~/library-assistant
             
