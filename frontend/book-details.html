@@ -175,6 +175,12 @@
         import { renderChatWidget, initChatWidget } from './src/components/chat-widget.js';
         import { mountStarRating } from './src/components/star-rating-wrapper.js';
         import { isBookLiked, isBookBorrowed, toggleLike, toggleBorrow } from './src/services/user-books.js';
+        import { isAuthenticated } from './src/services/auth.js';
+
+        // Redirect to login if not authenticated
+        if (!isAuthenticated()) {
+            window.location.href = 'login.html';
+        }
 
         // Initialize header
         document.getElementById('header-container').innerHTML = renderHeader();

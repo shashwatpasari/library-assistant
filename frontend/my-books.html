@@ -41,31 +41,38 @@
         .search-container #search-input,
         .search-container #search-input:hover,
         .search-container #search-input:focus {
-            border-width: 1.5px;              /* EXACT same thickness always */
-            border-color: #e5e7eb;            /* default gray-200 */
+            border-width: 1.5px;
+            /* EXACT same thickness always */
+            border-color: #e5e7eb;
+            /* default gray-200 */
             outline: none;
-            box-shadow: none;                 /* kill any focus ring from Tailwind/forms */
+            box-shadow: none;
+            /* kill any focus ring from Tailwind/forms */
             transition: border-color 150ms ease;
         }
 
         .search-container #search-dropdown {
             border-width: 1.5px;
-            border-color: #e5e7eb;            /* default gray-200 */
+            border-color: #e5e7eb;
+            /* default gray-200 */
         }
 
         /* Hover (only when not focused): lighter blue */
         .search-container:hover #search-input:not(:focus) {
-            border-color: #93c5fd;            /* blue-300 */
+            border-color: #93c5fd;
+            /* blue-300 */
         }
 
         /* Focus (clicked): deeper blue on bar and results, overrides hover completely */
         .search-container:focus-within #search-input,
         .search-container:focus-within #search-input:hover {
-            border-color: #2563eb;            /* deep blue */
+            border-color: #2563eb;
+            /* deep blue */
         }
 
         .search-container:focus-within #search-dropdown {
-            border-color: #2563eb;            /* match deep blue */
+            border-color: #2563eb;
+            /* match deep blue */
         }
 
         /* Placeholder text uses heading font, typed text uses body font */
@@ -162,6 +169,12 @@
         import { renderHeader, initHeader } from './src/components/header.js';
         import { renderChatWidget, initChatWidget } from './src/components/chat-widget.js';
         import { getLikedBooks, getBorrowedBooks, removeFromLiked, removeFromBorrowed } from './src/services/user-books.js';
+        import { isAuthenticated } from './src/services/auth.js';
+
+        // Redirect to login if not authenticated
+        if (!isAuthenticated()) {
+            window.location.href = 'login.html';
+        }
 
         // Initialize header
         document.getElementById('header-container').innerHTML = renderHeader();
@@ -354,7 +367,7 @@
             try {
                 const allLikedBooks = getLikedBooks();
                 const totalPages = Math.ceil(allLikedBooks.length / pageSize);
-                
+
                 if (allLikedBooks.length === 0) {
                     likedGrid.innerHTML = '<div class="col-span-5 text-center py-8 text-gray-500 dark:text-gray-400">No liked books yet.</div>';
                     if (likedPagination) likedPagination.innerHTML = '';
@@ -392,7 +405,7 @@
             try {
                 const allBorrowedBooks = getBorrowedBooks();
                 const totalPages = Math.ceil(allBorrowedBooks.length / pageSize);
-                
+
                 if (allBorrowedBooks.length === 0) {
                     borrowedGrid.innerHTML = '<div class="col-span-5 text-center py-8 text-gray-500 dark:text-gray-400">No borrowed books yet.</div>';
                     if (borrowedPagination) borrowedPagination.innerHTML = '';

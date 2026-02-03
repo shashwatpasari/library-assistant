@@ -168,6 +168,12 @@
         import { renderHeader, initHeader } from './src/components/header.js';
         import { renderChatWidget, initChatWidget } from './src/components/chat-widget.js';
         import { getLikedBooks, isBookLiked, toggleLike, removeFromLiked } from './src/services/user-books.js';
+        import { isAuthenticated } from './src/services/auth.js';
+
+        // Redirect to login if not authenticated
+        if (!isAuthenticated()) {
+            window.location.href = 'login.html';
+        }
 
         // Initialize header
         document.getElementById('header-container').innerHTML = renderHeader();
@@ -600,7 +606,7 @@
             // Find the book in the current page's books
             const allBooks = Array.from(document.querySelectorAll('#books-grid > div[data-book-id]'));
             const bookElement = allBooks.find(el => el.getAttribute('data-book-id') == bookId);
-            
+
             if (!bookElement) {
                 console.error('Book not found:', bookId);
                 return;
@@ -608,14 +614,14 @@
 
             // Get book data from the element or fetch it
             const book = window.currentBooks?.find(b => b.id === parseInt(bookId));
-            
+
             if (!book) {
                 console.error('Book data not found:', bookId);
                 return;
             }
 
             toggleLike(book);
-            
+
             // Update button visual
             const favoriteBtn = bookElement.querySelector('button[aria-label="Add to My Books"]');
             if (favoriteBtn) {
