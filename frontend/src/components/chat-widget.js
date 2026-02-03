@@ -3,6 +3,17 @@
  * Provides consistent AI assistant chat interface as a right-side panel
  */
 
+// Dynamic API URL - works in both dev and production
+function getApiBaseUrl() {
+    const hostname = window.location.hostname;
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        return 'http://localhost:8000';
+    }
+    return '/api';
+}
+
+const API_BASE_URL = getApiBaseUrl();
+
 /**
  * Renders the chat widget HTML as a right-side panel
  * @param {Object} options - Configuration options
@@ -268,7 +279,7 @@ export function initChatWidget() {
                 alert('Please log in to save books');
                 return;
             }
-            const response = await fetch(`http://localhost:8000/saved-books/${parseInt(bookId, 10)}`, {
+            const response = await fetch(`${API_BASE_URL}/saved-books/${parseInt(bookId, 10)}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
             });
@@ -408,7 +419,7 @@ export function initChatWidget() {
             const formData = new FormData();
             formData.append('audio', audioBlob, 'recording.webm');
 
-            const response = await fetch('http://localhost:8000/voice/transcribe', {
+            const response = await fetch(`${API_BASE_URL}/voice/transcribe`, {
                 method: 'POST',
                 body: formData
             });
@@ -490,7 +501,7 @@ export function initChatWidget() {
 
         try {
             const token = localStorage.getItem('auth_token');
-            const response = await fetch('http://localhost:8000/chat/', {
+            const response = await fetch(`${API_BASE_URL}/chat/`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -618,7 +629,7 @@ export function initChatWidget() {
         }
 
         try {
-            const response = await fetch(`http://localhost:8000/saved-books/${bookId}`, {
+            const response = await fetch(`${API_BASE_URL}/saved-books/${bookId}`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,

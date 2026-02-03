@@ -1,0 +1,32 @@
+name: Deploy to GCP
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:  # Allows manual trigger from GitHub UI
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Deploy to GCP VM
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.GCP_HOST }}
+          username: ${{ secrets.GCP_USERNAME }}
+          key: ${{ secrets.GCP_SSH_KEY }}
+          script: |
+            cd ~/library-assistant
+            
+            # Pull latest code
+            git pull origin main
+            
+            # Rebuild and restart containers
+            docker compose build --no-cache
+            docker compose up -d
+            
+            # Clean up old images
+            docker image prune -f
+            
+            echo "✅ Deployment complete!"
