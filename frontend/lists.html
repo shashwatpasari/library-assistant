@@ -109,15 +109,17 @@
 
     <!-- Scripts -->
     <script type="module">
-        import { renderChatWidget } from './src/components/chat-widget.js';
-        import { initChat } from './src/services/chat.js';
+        import { renderChatWidget, initChatWidget } from './src/components/chat-widget.js';
 
         // Initialize Chat
         document.getElementById('chat-widget-container').innerHTML = renderChatWidget();
-        initChat();
+        initChatWidget();
 
-        // List Management Logic
-        const API_URL = 'http://localhost:8000';
+        // List Management Logic - dynamic API URL
+        const hostname = window.location.hostname;
+        const API_URL = (hostname === 'localhost' || hostname === '127.0.0.1')
+            ? 'http://localhost:8000'
+            : `http://${hostname}:8000`;
         const container = document.getElementById('listsContainer');
         const modal = document.getElementById('createListModal');
         const token = localStorage.getItem('auth_token');
