@@ -2,8 +2,24 @@
  * Authentication service for user login, signup, and token management.
  */
 
-// API_BASE_URL can be overridden by setting window.API_BASE_URL before loading this script
-const API_BASE_URL = window.API_BASE_URL || 'http://localhost:8000';
+// Dynamically determine API URL based on current location
+function getApiBaseUrl() {
+    if (window.API_BASE_URL) {
+        return window.API_BASE_URL;
+    }
+
+    const hostname = window.location.hostname;
+
+    // If on localhost, use localhost backend
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        return 'http://localhost:8000';
+    }
+
+    // In production, use same host with port 8000
+    return `http://${hostname}:8000`;
+}
+
+const API_BASE_URL = getApiBaseUrl();
 const TOKEN_KEY = 'auth_token';
 const USER_KEY = 'current_user';
 
