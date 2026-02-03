@@ -80,3 +80,4 @@ frontend/stitch_book_details_and_chat/
 frontend/*.md
 backend/docs/*.md
 *.sql
+*.zip

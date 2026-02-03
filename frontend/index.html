@@ -148,6 +148,12 @@
         import { fetchBooks, getBookCoverUrl, formatAuthors } from './src/services/api.js';
         import { renderHeader, initHeader } from './src/components/header.js';
         import { renderChatWidget, initChatWidget } from './src/components/chat-widget.js';
+        import { isAuthenticated } from './src/services/auth.js';
+
+        // Redirect to login if not authenticated
+        if (!isAuthenticated()) {
+            window.location.href = 'login.html';
+        }
 
         // Dynamic API URL - works in both dev and production
         const hostname = window.location.hostname;
