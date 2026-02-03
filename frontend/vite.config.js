@@ -20,7 +20,12 @@ export default defineConfig({
         main: resolve(__dirname, 'index.html'),
         catalog: resolve(__dirname, 'catalog.html'),
         'book-details': resolve(__dirname, 'book-details.html'),
-        'my-books': resolve(__dirname, 'my-books.html')
+        'my-books': resolve(__dirname, 'my-books.html'),
+        login: resolve(__dirname, 'login.html'),
+        signup: resolve(__dirname, 'signup.html'),
+        onboarding: resolve(__dirname, 'onboarding.html'),
+        lists: resolve(__dirname, 'lists.html'),
+        'reset-password': resolve(__dirname, 'reset-password.html')
       }
     }
   }
