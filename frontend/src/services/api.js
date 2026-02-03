@@ -2,8 +2,26 @@
  * API service for communicating with the backend FastAPI server.
  */
 
-// API_BASE_URL can be overridden by setting window.API_BASE_URL before loading this script
-const API_BASE_URL = window.API_BASE_URL || 'http://localhost:8000';
+// Dynamically determine API URL based on current location
+// In production: use same host as frontend with port 8000
+// In development: use localhost:8000
+function getApiBaseUrl() {
+    if (window.API_BASE_URL) {
+        return window.API_BASE_URL;
+    }
+
+    const hostname = window.location.hostname;
+
+    // If on localhost, use localhost backend
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        return 'http://localhost:8000';
+    }
+
+    // In production, use same host with port 8000
+    return `http://${hostname}:8000`;
+}
+
+const API_BASE_URL = getApiBaseUrl();
 
 /**
  * Fetch books from the API with optional filters and pagination.
