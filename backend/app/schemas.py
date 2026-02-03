@@ -258,8 +258,12 @@ class ReadingListRead(ReadingListBase):
     id: int
     user_id: int
     created_at: datetime
-    items: list[ReadingListItemRead] = []
+    items: list["ReadingListItemRead"] = []
 
     class Config:
         from_attributes = True
 
+
+# Rebuild models to resolve forward references
+ReadingListItemRead.model_rebuild()
+ReadingListRead.model_rebuild()
