@@ -1,5 +1,5 @@
 """
-RAG Chat service using Ollama for LLM and pgvector for retrieval.
+RAG Chat service using Ollama or Groq for LLM and pgvector for retrieval.
 """
 import httpx
 import json
@@ -7,11 +7,18 @@ from sqlalchemy import select, String
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
-from app.config import OLLAMA_BASE_URL, OLLAMA_MODEL
+from app.config import (
+    OLLAMA_BASE_URL, OLLAMA_MODEL,
+    LLM_PROVIDER, GROQ_API_KEY, GROQ_MODEL
+)
 from app.models import Book, BookCopy
 from app.services.embedding import generate_embedding
 from app.services.books import get_book_availability
 from app.services.recommendations import get_personalized_recommendations
+
+
+# Groq API base URL
+GROQ_API_URL = "https://api.groq.com/openai/v1"
 
 
 async def detect_query_intent(query: str) -> dict:
@@ -42,19 +49,36 @@ async def detect_query_intent(query: str) -> dict:
     """
     
     try:
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            response = await client.post(
-                f"{OLLAMA_BASE_URL}/api/generate",
-                json={
-                    "model": OLLAMA_MODEL,
-                    "prompt": f"Query: {query}\nJSON:",
-                    "system": system_prompt,
-                    "stream": False,
-                    "format": "json"
-                }
-            )
-            if response.status_code == 200:
-                return json.loads(response.json()["response"])
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            if LLM_PROVIDER == "groq" and GROQ_API_KEY:
+                response = await client.post(
+                    f"{GROQ_API_URL}/chat/completions",
+                    headers={"Authorization": f"Bearer {GROQ_API_KEY}"},
+                    json={
+                        "model": GROQ_MODEL,
+                        "messages": [
+                            {"role": "system", "content": system_prompt},
+                            {"role": "user", "content": f"Query: {query}\nJSON:"}
+                        ],
+                        "response_format": {"type": "json_object"},
+                        "max_tokens": 100
+                    }
+                )
+                if response.status_code == 200:
+                    return json.loads(response.json()["choices"][0]["message"]["content"])
+            else:
+                response = await client.post(
+                    f"{OLLAMA_BASE_URL}/api/generate",
+                    json={
+                        "model": OLLAMA_MODEL,
+                        "prompt": f"Query: {query}\nJSON:",
+                        "system": system_prompt,
+                        "stream": False,
+                        "format": "json"
+                    }
+                )
+                if response.status_code == 200:
+                    return json.loads(response.json()["response"])
     except Exception as e:
         print(f"Error detecting intent: {e}")
     
@@ -64,7 +88,6 @@ async def detect_query_intent(query: str) -> dict:
 
 async def extract_search_filters(query: str) -> dict:
     """Use LLM to extract structured search filters from natural language query."""
-    import json
     
     system_prompt = """You are a search query parser for a library. Extract filters from the user's query.
     Return ONLY a JSON object with these keys (use null if not mentioned):
@@ -85,19 +108,36 @@ async def extract_search_filters(query: str) -> dict:
     """
     
     try:
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            response = await client.post(
-                f"{OLLAMA_BASE_URL}/api/generate",
-                json={
-                    "model": OLLAMA_MODEL,
-                    "prompt": f"Query: {query}\nJSON:",
-                    "system": system_prompt,
-                    "stream": False,
-                    "format": "json"
-                }
-            )
-            if response.status_code == 200:
-                return json.loads(response.json()["response"])
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            if LLM_PROVIDER == "groq" and GROQ_API_KEY:
+                response = await client.post(
+                    f"{GROQ_API_URL}/chat/completions",
+                    headers={"Authorization": f"Bearer {GROQ_API_KEY}"},
+                    json={
+                        "model": GROQ_MODEL,
+                        "messages": [
+                            {"role": "system", "content": system_prompt},
+                            {"role": "user", "content": f"Query: {query}\nJSON:"}
+                        ],
+                        "response_format": {"type": "json_object"},
+                        "max_tokens": 200
+                    }
+                )
+                if response.status_code == 200:
+                    return json.loads(response.json()["choices"][0]["message"]["content"])
+            else:
+                response = await client.post(
+                    f"{OLLAMA_BASE_URL}/api/generate",
+                    json={
+                        "model": OLLAMA_MODEL,
+                        "prompt": f"Query: {query}\nJSON:",
+                        "system": system_prompt,
+                        "stream": False,
+                        "format": "json"
+                    }
+                )
+                if response.status_code == 200:
+                    return json.loads(response.json()["response"])
     except Exception as e:
         print(f"Error extracting filters: {e}")
         
@@ -363,96 +403,125 @@ PERSONALIZATION INSTRUCTIONS:
     - **NEVER** output the full BOOK[...] tag. Use **ONLY** `BID[id]`.
     """
 
-    # Build messages array for Ollama chat API
-    ollama_messages = [{"role": "system", "content": system_message}]
+    # Build messages array for LLM chat API
+    llm_messages = [{"role": "system", "content": system_message}]
     
     # Add conversation history
     for msg in messages:
-        ollama_messages.append({
+        llm_messages.append({
             "role": msg.role,
             "content": msg.content
         })
 
-    async with httpx.AsyncClient(timeout=60.0) as client:
-        async with client.stream(
-            "POST",
-            f"{OLLAMA_BASE_URL}/api/chat",
-            json={
-                "model": OLLAMA_MODEL,
-                "messages": ollama_messages,
-                "stream": True,
-            }
-        ) as response:
-            buffer = ""
-            collected_ids = []  # Use list to preserve order
-            
-            async for line in response.aiter_lines():
-                if line:
-                    data = json.loads(line)
-                    if "message" in data and "content" in data["message"]:
-                        chunk = data["message"]["content"]
-                        buffer += chunk
-                        
-                        # Process buffer for BID tags
-                        # We need to be careful not to split a tag across chunks
-                        # Simple approach: Yield everything up to the last potential open bracket
-                        
-                        while "BID[" in buffer:
-                            start_idx = buffer.find("BID[")
-                            end_idx = buffer.find("]", start_idx)
-                            
-                            if end_idx != -1:
-                                # We found a complete tag
-                                # Yield text before the tag
-                                if start_idx > 0:
-                                    yield buffer[:start_idx]
-                                
-                                # Extract ID
-                                bid_content = buffer[start_idx+4:end_idx]
-                                if bid_content.isdigit():
-                                    bid_int = int(bid_content)
-                                    if bid_int not in collected_ids:
-                                        collected_ids.append(bid_int)
-                                
-                                # Remove processed part from buffer
-                                buffer = buffer[end_idx+1:]
-                            else:
-                                # Tag is incomplete, wait for more chunks
-                                break
-                        
-                        # Yield safe part of buffer (if no partial tag at end)
-                        if "BID" not in buffer and "[" not in buffer:
-                            yield buffer
-                            buffer = ""
-            
-            # Yield remaining buffer
-            if buffer:
-                yield buffer
+    buffer = ""
+    collected_ids = []  # Use list to preserve order
 
-            # End of stream: Append Book Cards Data
-            # Use collected BID tags if available, otherwise fall back to all retrieved books
-            if collected_ids or books_map:
-                import json
-                cards_data = []
-                
-                # If LLM outputted BID tags, use those (maintains consistency with text)
-                if collected_ids:
-                    for bid in collected_ids:
-                        b = books_map.get(bid)
-                        if not b:
-                            b = session.get(Book, bid)
-                        if b:
-                            avail = get_book_availability(session, book_id=b.id)
-                            cards_data.append({
-                                "id": b.id,
-                                "title": b.title,
-                                "author": b.author,
-                                "cover": b.cover_image_url or b.image or "",
-                                "availability": f"{avail.available_copies}/{avail.total_copies} available"
-                            })
-                else:
-                    # Fallback: show all retrieved books if no BIDs detected
-                    for b in books_map.values():
+    async with httpx.AsyncClient(timeout=120.0) as client:
+        if LLM_PROVIDER == "groq" and GROQ_API_KEY:
+            # Use Groq API (OpenAI-compatible streaming)
+            async with client.stream(
+                "POST",
+                f"{GROQ_API_URL}/chat/completions",
+                headers={"Authorization": f"Bearer {GROQ_API_KEY}"},
+                json={
+                    "model": GROQ_MODEL,
+                    "messages": llm_messages,
+                    "stream": True,
+                    "max_tokens": 1500
+                }
+            ) as response:
+                async for line in response.aiter_lines():
+                    if line.startswith("data: "):
+                        data_str = line[6:]
+                        if data_str.strip() == "[DONE]":
+                            break
+                        try:
+                            data = json.loads(data_str)
+                            if "choices" in data and data["choices"]:
+                                delta = data["choices"][0].get("delta", {})
+                                chunk = delta.get("content", "")
+                                if chunk:
+                                    buffer += chunk
+                                    
+                                    # Process buffer for BID tags
+                                    while "BID[" in buffer:
+                                        start_idx = buffer.find("BID[")
+                                        end_idx = buffer.find("]", start_idx)
+                                        
+                                        if end_idx != -1:
+                                            if start_idx > 0:
+                                                yield buffer[:start_idx]
+                                            
+                                            bid_content = buffer[start_idx+4:end_idx]
+                                            if bid_content.isdigit():
+                                                bid_int = int(bid_content)
+                                                if bid_int not in collected_ids:
+                                                    collected_ids.append(bid_int)
+                                            
+                                            buffer = buffer[end_idx+1:]
+                                        else:
+                                            break
+                                    
+                                    if "BID" not in buffer and "[" not in buffer:
+                                        yield buffer
+                                        buffer = ""
+                        except json.JSONDecodeError:
+                            pass
+        else:
+            # Use Ollama API
+            async with client.stream(
+                "POST",
+                f"{OLLAMA_BASE_URL}/api/chat",
+                json={
+                    "model": OLLAMA_MODEL,
+                    "messages": llm_messages,
+                    "stream": True,
+                }
+            ) as response:
+                async for line in response.aiter_lines():
+                    if line:
+                        data = json.loads(line)
+                        if "message" in data and "content" in data["message"]:
+                            chunk = data["message"]["content"]
+                            buffer += chunk
+                            
+                            # Process buffer for BID tags
+                            while "BID[" in buffer:
+                                start_idx = buffer.find("BID[")
+                                end_idx = buffer.find("]", start_idx)
+                                
+                                if end_idx != -1:
+                                    if start_idx > 0:
+                                        yield buffer[:start_idx]
+                                    
+                                    bid_content = buffer[start_idx+4:end_idx]
+                                    if bid_content.isdigit():
+                                        bid_int = int(bid_content)
+                                        if bid_int not in collected_ids:
+                                            collected_ids.append(bid_int)
+                                    
+                                    buffer = buffer[end_idx+1:]
+                                else:
+                                    break
+                            
+                            if "BID" not in buffer and "[" not in buffer:
+                                yield buffer
+                                buffer = ""
+        
+        # Yield remaining buffer
+        if buffer:
+            yield buffer
+
+        # End of stream: Append Book Cards Data
+        if collected_ids or books_map:
+            cards_data = []
+            
+            if collected_ids:
+                for bid in collected_ids:
+                    b = books_map.get(bid)
+                    if not b:
+                        b = session.get(Book, bid)
+                    if b:
                         avail = get_book_availability(session, book_id=b.id)
                         cards_data.append({
                             "id": b.id,
@@ -461,6 +530,16 @@ PERSONALIZATION INSTRUCTIONS:
                             "cover": b.cover_image_url or b.image or "",
                             "availability": f"{avail.available_copies}/{avail.total_copies} available"
                         })
-                
-                if cards_data:
-                    yield f"\n\n__JSON_START__{json.dumps(cards_data)}"
+            else:
+                for b in books_map.values():
+                    avail = get_book_availability(session, book_id=b.id)
+                    cards_data.append({
+                        "id": b.id,
+                        "title": b.title,
+                        "author": b.author,
+                        "cover": b.cover_image_url or b.image or "",
+                        "availability": f"{avail.available_copies}/{avail.total_copies} available"
+                    })
+            
+            if cards_data:
+                yield f"\n\n__JSON_START__{json.dumps(cards_data)}"
