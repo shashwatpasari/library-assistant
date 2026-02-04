@@ -462,9 +462,12 @@ PERSONALIZATION INSTRUCTIONS:
                                         else:
                                             break
                                     
-                                    if "BID" not in buffer and "[" not in buffer:
-                                        yield buffer
-                                        buffer = ""
+                                    # Yield text if no BID tag is being built
+                                    # Only hold back if we see start of potential tag
+                                    if "BID[" not in buffer:
+                                        if buffer and not buffer.endswith("BID") and not buffer.endswith("BI") and not buffer.endswith("B"):
+                                            yield buffer
+                                            buffer = ""
                         except json.JSONDecodeError:
                             pass
         else:
