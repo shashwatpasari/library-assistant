@@ -55,10 +55,15 @@ class Book(Base):
     pages: Mapped[int | None] = mapped_column(Integer, nullable=True)
     rating: Mapped[float | None] = mapped_column(Float, nullable=True)  # Book rating (e.g., 4.5 out of 5)
     date_published: Mapped[str | None] = mapped_column(String(32), nullable=True)  # Store as string (YYYY-MM-DD or year)
+    published_year: Mapped[int | None] = mapped_column(Integer, nullable=True, index=True)  # Integer year for proper filtering
     cover_image_url: Mapped[str | None] = mapped_column(String(512), nullable=True)
     image: Mapped[str | None] = mapped_column(String(512), nullable=True)  # Image URL from API
     image_original: Mapped[str | None] = mapped_column(String(512), nullable=True)  # Original image URL from API
     embedding: Mapped[list[float] | None] = mapped_column(Vector(384), nullable=True) # Vector embedding for semantic search
+    feature_vector: Mapped[list[float] | None] = mapped_column(Vector(128), nullable=True)  # Content-based feature vector
+    collaborative_embedding: Mapped[list[float] | None] = mapped_column(Vector(50), nullable=True)  # Collaborative filtering embedding
+    popularity_score: Mapped[float | None] = mapped_column(Float, nullable=True, default=0.0)  # Interaction-derived popularity
+
     
     # AI-enriched metadata fields
     pacing: Mapped[str | None] = mapped_column(String(32), nullable=True)  # Fast, Medium, Slow
@@ -172,3 +177,40 @@ class ReadingListItem(Base):
     reading_list: Mapped["ReadingList"] = relationship(back_populates="items")
     book: Mapped["Book"] = relationship()
 
+
+class BorrowHistory(Base):
+    """Tracks which user borrowed which book and when (for collaborative filtering)."""
+    __tablename__ = "borrow_history"
+    __table_args__ = (
+        UniqueConstraint("user_id", "book_id", "borrowed_at", name="uq_borrow_history"),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    book_id: Mapped[int] = mapped_column(
+        ForeignKey("books.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    borrowed_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=datetime.utcnow)
+    returned_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    rating: Mapped[float | None] = mapped_column(Float, nullable=True)  # User's rating after return
+
+    user: Mapped["User"] = relationship()
+    book: Mapped["Book"] = relationship()
+
+
+class UserInteraction(Base):
+    """Aggregated user interaction data for collaborative filtering."""
+    __tablename__ = "user_interactions"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), unique=True, nullable=False, index=True
+    )
+    interaction_count: Mapped[int] = mapped_column(Integer, default=0)
+    preference_vector: Mapped[list[float] | None] = mapped_column(Vector(128), nullable=True)
+    collaborative_embedding: Mapped[list[float] | None] = mapped_column(Vector(50), nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    user: Mapped["User"] = relationship()

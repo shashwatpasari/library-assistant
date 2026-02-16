@@ -5,6 +5,12 @@ Entry point for the Library Assistant FastAPI application.
 from __future__ import annotations
 
 import os
+from pathlib import Path
+
+# Load .env file from project root
+from dotenv import load_dotenv
+project_root = Path(__file__).parent.parent.parent
+load_dotenv(project_root / ".env")
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -15,6 +21,7 @@ from slowapi.errors import RateLimitExceeded
 
 from app.api.routes import auth as auth_router, books as books_router, chat as chat_router, saved_books as saved_books_router, voice as voice_router, users as users_router
 from app.api.routes import reading_lists as reading_lists_router
+from app.api.routes import borrowed_books as borrowed_books_router
 from app.database import engine, init_pgvector
 from app.models import Base
 
@@ -62,6 +69,7 @@ app.include_router(saved_books_router.router)
 app.include_router(voice_router.router)
 app.include_router(users_router.router)
 app.include_router(reading_lists_router.router)
+app.include_router(borrowed_books_router.router)
 
 
 # To run: uvicorn app.main:app --reload

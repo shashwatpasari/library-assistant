@@ -1,54 +1,8 @@
 # 📚 Library Assistant
 
-> **An intelligent book discovery platform that transforms how you find your next read.**
+A full-stack book discovery platform with an AI chatbot that recommends books based on your taste, mood, and reading history.
 
-Traditional library catalogs rely on keyword searches and rigid filters—but readers often don't know exactly what they want. They know a *feeling*: "something like The Alchemist but more philosophical" or "a cozy mystery for a rainy weekend."
-
-**Library Assistant** solves this by combining **semantic vector search** with a **conversational AI chatbot** powered by RAG (Retrieval-Augmented Generation). Instead of browsing endless catalogs, users simply *describe* what they're looking for, and the AI understands context, mood, and themes to deliver personalized recommendations.
-
-### Key Highlights
-
-- 🧠 **RAG-Powered Chatbot** — Understands natural language queries and retrieves contextually relevant books before generating responses
-- 🔍 **Semantic Search** — Uses 384-dimensional embeddings to find books by meaning, not just keywords
-- ⚡ **Streaming Responses** — Real-time token streaming for instant feedback
-- 🎯 **Personalization** — Learns preferences through onboarding and liked books
-- 🐳 **Production-Ready** — Fully containerized with automated CI/CD deployment
-
-[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-Visit_Site-blue?style=for-the-badge)](http://YOUR_IP_HERE:3000)
-[![GitHub Actions](https://img.shields.io/badge/CI%2FCD-GitHub_Actions-2088FF?style=for-the-badge&logo=github-actions&logoColor=white)](https://github.com/shashwatpasari/library-assistant/actions)
-
----
-
-## 🎬 Demo
-
-### Live Application
-🔗 **[http://YOUR_IP_HERE:3000](http://YOUR_IP_HERE:3000)**
-
-### Video Walkthrough
-<!-- Add your video link here -->
-[![Watch Demo](https://img.shields.io/badge/▶_Watch_Demo-YouTube-red?style=for-the-badge&logo=youtube)](https://youtube.com/watch?v=YOUR_VIDEO_ID)
-
-<!-- Or embed a GIF -->
-<!-- ![Demo GIF](docs/demo.gif) -->
-
----
-
-## 🧠 How It Works
-
-The chatbot uses **RAG (Retrieval-Augmented Generation)** to understand queries like:
-- *"Suggest something like Harry Potter but darker"*
-- *"Fast-paced thriller for a beach read"*
-- *"Books about AI and consciousness"*
-
-### RAG Pipeline
-
-```
-User Query → Embedding → Vector Search (pgvector) → Context Injection → LLM Response
-```
-
-1. **Embed**: Query converted to 384-dim vector using `sentence-transformers/all-MiniLM-L6-v2`
-2. **Retrieve**: pgvector finds semantically similar books from 8,000 embeddings
-3. **Generate**: Qwen 2.5 LLM generates personalized recommendations with retrieved context
+> *Try asking: "I loved The Hunger Games — what should I read next?"*
 
 ---
 
@@ -56,38 +10,78 @@ User Query → Embedding → Vector Search (pgvector) → Context Injection → 
 
 | Feature | Description |
 |---------|-------------|
-| 🤖 **AI Chatbot** | Natural language book recommendations with streaming responses |
-| 🔍 **Semantic Search** | Find books by vibe, mood, or theme—not just keywords |
-| 📚 **8,000 Books** | Comprehensive catalog with covers, ratings, and synopses |
-| ❤️ **Personal Library** | Like, borrow, and organize your reading list |
-| 🎯 **Preference Learning** | Onboarding flow tailors recommendations to your taste |
-| 🔐 **Secure Auth** | JWT authentication with email verification |
-| ⚡ **Real-time Streaming** | See AI responses as they're generated |
+| 🤖 **AI Chatbot** | Conversational book recommendations powered by RAG |
+| 🔍 **Semantic Search** | Finds books by meaning using 384-dim vector embeddings |
+| 🧠 **LangGraph Pipeline** | Multi-agent graph with intent routing, guardrails, and hybrid retrieval |
+| 📊 **Collaborative Filtering** | Recommendations improve as more users interact |
+| 📚 **8,000+ Books** | Full catalog with covers, ratings, synopses, and metadata |
+| ❤️ **Personal Library** | Save, borrow, and organize books into reading lists |
+| 🎯 **Preference Learning** | Onboarding flow and liked-book history tailor recommendations |
+| 🔐 **Auth** | JWT authentication with email verification and password reset |
+| ⚡ **Streaming** | SSE-based token streaming for real-time responses |
+
+---
+
+## 🧠 How It Works
+
+The chatbot is built on a **LangGraph** state machine that routes each query through specialized agent nodes:
+
+```
+User Query
+    │
+    ▼
+┌──────────────────────┐
+│  Intent Router (LLM) │  Classifies into one of 7 intents
+└──────────┬───────────┘
+           │
+     deterministic routing
+           │
+    ┌──────┴──────────────────────────────────────┐
+    │              Agent Nodes                     │
+    ├─ recommendation_agent   (hybrid retrieval)   │
+    ├─ similar_books_agent    (cosine similarity)  │
+    ├─ comparison_agent       (side-by-side)       │
+    ├─ user_history_agent     (saved/borrowed)     │
+    ├─ book_details_agent     (single book info)   │
+    ├─ account_action_agent   (save/borrow)        │
+    └─ general_info_agent     (library info)       │
+           │
+           ▼
+┌──────────────────────┐
+│  LLM Generation      │  Generates response using retrieved context
+└──────────┬───────────┘
+           │
+           ▼
+    Streamed Response + Book Cards
+```
+
+**Key design decisions:**
+- The LLM is used **only** for intent classification and response generation — all routing is deterministic
+- Similarity scoring is computed **in code** (cosine similarity), never delegated to the LLM
+- Hybrid retrieval combines **vector search** (pgvector), **full-text search** (PostgreSQL FTS), and **collaborative filtering**
 
 ---
 
 ## 🏗️ Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                         NGINX (Port 3000)                        │
-│                    Reverse Proxy + Static Files                  │
-├─────────────────────────────────────────────────────────────────┤
-│                              │                                   │
-│    ┌──────────────────┐     │     ┌──────────────────────┐      │
-│    │     Frontend     │     │     │      Backend API     │      │
-│    │   (Vite + JS)    │ ◄───┼───► │      (FastAPI)       │      │
-│    └──────────────────┘     │     └──────────────────────┘      │
-│                              │              │                    │
-│                              │              ▼                    │
-│                    ┌─────────┴─────────────────────────┐        │
-│                    │                                    │        │
-│         ┌──────────▼──────────┐    ┌──────────────────▼─┐       │
-│         │     PostgreSQL      │    │       Ollama       │       │
-│         │   + pgvector        │    │    (Qwen 2.5)      │       │
-│         │   (Embeddings)      │    │                    │       │
-│         └─────────────────────┘    └────────────────────┘       │
-└─────────────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────┐
+│                  NGINX (Port 3000)                      │
+│             Reverse Proxy + Static Files                │
+├───────────────────────┬─────────────────────────────────┤
+│                       │                                  │
+│  ┌────────────────┐   │   ┌───────────────────────┐     │
+│  │   Frontend     │   │   │    Backend API        │     │
+│  │  (Vite + JS)   │◄──┼──►│    (FastAPI)          │     │
+│  └────────────────┘   │   └───────────┬───────────┘     │
+│                       │               │                  │
+│             ┌─────────┴───────┐       │                  │
+│             │                 │       │                  │
+│  ┌──────────▼──────┐  ┌──────▼───────▼──┐              │
+│  │  PostgreSQL 16  │  │   Groq Cloud    │              │
+│  │  + pgvector     │  │   (LLM API)     │              │
+│  └─────────────────┘  └─────────────────┘              │
+└───────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -96,55 +90,51 @@ User Query → Embedding → Vector Search (pgvector) → Context Injection → 
 
 | Layer | Technology |
 |-------|------------|
-| **Frontend** | Vite, JavaScript, Tailwind CSS |
+| **Frontend** | Vite, Vanilla JavaScript, HTML/CSS |
 | **Backend** | Python 3.11, FastAPI, SQLAlchemy |
 | **Database** | PostgreSQL 16 + pgvector |
-| **AI/ML** | Qwen 2.5 LLM, Sentence Transformers |
-| **Embeddings** | all-MiniLM-L6-v2 (384 dimensions) |
-| **Infrastructure** | Docker Compose, Nginx, GCP Compute Engine |
-| **CI/CD** | GitHub Actions |
+| **RAG Pipeline** | LangGraph, LangChain |
+| **LLMs** | Groq — Llama 3.3 70B (generation), Llama 3.1 8B (intent routing) |
+| **Embeddings** | Sentence Transformers — all-MiniLM-L6-v2 (384-dim) |
+| **Infrastructure** | Docker Compose, Nginx |
 
 ---
 
-## 📸 Screenshots
-
-<!-- Add your screenshots here -->
-
-| Home Page | Catalog | AI Chat |
-|:---------:|:-------:|:-------:|
-| ![Home](docs/screenshots/home.png) | ![Catalog](docs/screenshots/catalog.png) | ![Chat](docs/screenshots/chat.png) |
-
-| Book Details | My Books | Onboarding |
-|:------------:|:--------:|:----------:|
-| ![Details](docs/screenshots/details.png) | ![MyBooks](docs/screenshots/mybooks.png) | ![Onboarding](docs/screenshots/onboarding.png) |
-
----
-
-## 🚀 Quick Start
+## 🚀 Getting Started
 
 ### Prerequisites
-- Docker & Docker Compose
-- 8GB+ RAM (for LLM)
 
-### Run Locally
+- Docker & Docker Compose
+- A [Groq API key](https://console.groq.com) (free tier available)
+
+### Configuration
+
+Copy the example environment file and fill in the required values:
 
 ```bash
-# Clone the repository
-git clone https://github.com/shashwatpasari/library-assistant.git
-cd library-assistant
-
-# Copy environment file
 cp .env.example .env
-# Edit .env and add your secrets (JWT_SECRET_KEY, POSTGRES_PASSWORD)
-
-# Start all services
-docker compose up --build
-
-# Wait for services to start, then pull the LLM model
-docker compose exec ollama ollama pull qwen2.5:3b-instruct
 ```
 
-**Access the app at:** http://localhost:3000
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `POSTGRES_PASSWORD` | Database password | ✅ |
+| `JWT_SECRET_KEY` | JWT signing key — generate with `openssl rand -hex 32` | ✅ |
+| `GROQ_API_KEY` | Groq API key for LLM inference | ✅ |
+| `LLM_PROVIDER` | Set to `groq` | ✅ |
+| `GROQ_MODEL` | Generation model | Default: `llama-3.3-70b-versatile` |
+| `CORS_ORIGINS` | Allowed CORS origins | Default: `http://localhost:3000` |
+| `SMTP_HOST` | Email server (for password reset) | Optional |
+| `SMTP_USER` / `SMTP_PASSWORD` | Email credentials | Optional |
+| `FROM_EMAIL` | Sender email address | Optional |
+| `FRONTEND_URL` | Frontend URL for email links | Default: `http://localhost:3000` |
+
+### Start
+
+```bash
+docker compose up --build
+```
+
+The app will be available at <!-- add your URL here -->.
 
 ---
 
@@ -152,54 +142,61 @@ docker compose exec ollama ollama pull qwen2.5:3b-instruct
 
 ```
 library-assistant/
-├── frontend/               # Vite frontend (MPA)
-│   ├── src/
-│   │   ├── components/     # Shared components (header, chat-widget)
-│   │   └── services/       # API, auth, user-books services
-│   ├── index.html          # Home page
-│   ├── catalog.html        # Book browsing
-│   ├── book-details.html   # Individual book view
-│   ├── my-books.html       # User's library
-│   └── nginx.conf          # Nginx config with API proxy
-│
-├── backend/                # FastAPI backend
+├── backend/
 │   ├── app/
-│   │   ├── api/routes/     # API endpoints
-│   │   ├── models/         # SQLAlchemy models
-│   │   └── services/       # Business logic (chat, embedding, email)
-│   └── scripts/            # Data import utilities
+│   │   ├── api/routes/         # REST endpoints (auth, books, chat, saved_books, …)
+│   │   ├── rag/                # LangGraph pipeline
+│   │   │   ├── graph.py        # State machine — agent nodes & conditional edges
+│   │   │   ├── router.py       # LLM-based intent classification
+│   │   │   ├── retrievers.py   # Hybrid retrieval (vector + FTS + collaborative)
+│   │   │   ├── prompts.py      # All LLM prompt templates
+│   │   │   ├── streaming.py    # SSE streaming adapter
+│   │   │   ├── collaborative.py # Collaborative filtering embeddings
+│   │   │   └── …
+│   │   ├── services/           # Business logic (auth, books, borrow, email, …)
+│   │   ├── models.py           # SQLAlchemy ORM models
+│   │   └── config.py           # Environment-based configuration
+│   ├── migrations/             # SQL migrations (FTS indexes, collaborative filtering)
+│   ├── scripts/                # Data import & enrichment utilities
+│   ├── tests/                  # Pytest test suite
+│   └── Dockerfile
 │
-├── docker-compose.yml      # Service orchestration
-└── .github/workflows/      # CI/CD pipeline
+├── frontend/
+│   ├── src/
+│   │   ├── components/         # Chat widget, header, star rating
+│   │   ├── services/           # API, auth, user-books clients
+│   │   └── lib/                # Shared utilities
+│   ├── *.html                  # MPA pages (index, catalog, book-details, …)
+│   ├── vite.config.js
+│   ├── nginx.conf              # Reverse proxy configuration
+│   └── Dockerfile
+│
+├── docker-compose.yml          # Full-stack orchestration
+├── .github/workflows/          # CI/CD pipeline
+└── .env.example                # Configuration template
 ```
 
 ---
 
-## 🔧 Configuration
+## 📊 Data
 
-### Environment Variables
+The catalog contains **8,000+ books** sourced from Goodreads and enriched with:
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `POSTGRES_PASSWORD` | Database password | ✅ |
-| `JWT_SECRET_KEY` | JWT signing key | ✅ |
-| `OLLAMA_MODEL` | LLM model name | Default: `qwen2.5:3b-instruct` |
-| `SMTP_HOST` | Email server | Optional |
-| `SMTP_USER` | Email username | Optional |
-| `SMTP_PASSWORD` | Email password | Optional |
+- Titles, authors, genres, themes, moods
+- Synopses, cover images, page counts, ratings
+- 384-dimensional embedding vectors for semantic search
+
+Utility scripts in `backend/scripts/` handle scraping, enrichment, embedding, and import.
 
 ---
 
 ## 🚢 Deployment
 
-The app is deployed on **GCP Compute Engine** with automated CI/CD:
+Deployed on **GCP Compute Engine** with automated CI/CD:
 
-## 📊 Data
-
-The book dataset includes 8000+ titles sourced from:
-- Goodreads (scraped with custom scripts)
-
-Each book includes: title, authors, genres, synopsis, cover image, ratings, and 384-dimensional embedding vector.
+1. Push to `main` triggers a GitHub Actions workflow
+2. The workflow SSHs into the GCP VM
+3. Pulls latest code, rebuilds containers, restarts services
 
 ---
 
@@ -209,5 +206,3 @@ Each book includes: title, authors, genres, synopsis, cover image, ratings, and 
 
 [![GitHub](https://img.shields.io/badge/GitHub-shashwatpasari-181717?style=flat&logo=github)](https://github.com/shashwatpasari)
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-0A66C2?style=flat&logo=linkedin)](https://linkedin.com/in/shashwatpasari)
-
-

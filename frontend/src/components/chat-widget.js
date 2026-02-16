@@ -3,16 +3,9 @@
  * Provides consistent AI assistant chat interface as a right-side panel
  */
 
-// Dynamic API URL - works in both dev and production
-function getApiBaseUrl() {
-    const hostname = window.location.hostname;
-    if (hostname === 'localhost' || hostname === '127.0.0.1') {
-        return 'http://localhost:8000';
-    }
-    return '/api';
-}
-
-const API_BASE_URL = getApiBaseUrl();
+import { API_BASE_URL } from '../services/api.js';
+import { getSavedBookIds } from '../services/user-books.js';
+import { getCurrentUser } from '../services/auth.js';
 
 /**
  * Renders the chat widget HTML as a right-side panel
@@ -24,14 +17,23 @@ const API_BASE_URL = getApiBaseUrl();
  */
 export function renderChatWidget(options = {}) {
     const {
-        greeting = "Hello! I'm your AI assistant. How can I help you today?",
+        greeting = null,
         bookTitle = null,
         suggestedQuestions = []
     } = options;
 
+    const user = getCurrentUser();
+    const firstName = user?.full_name?.split(' ')[0] || null;
+
+    const defaultGreeting = firstName
+        ? `Hey ${firstName}! What are you in the mood to read today? 📚`
+        : "Hello! I'm your AI assistant. How can I help you today?";
+
     const greetingText = bookTitle
-        ? `Hello! I'm your AI assistant. Ask me anything about "${bookTitle}".`
-        : greeting;
+        ? (firstName
+            ? `Hey ${firstName}! Ask me anything about "${bookTitle}".`
+            : `Hello! I'm your AI assistant. Ask me anything about "${bookTitle}".`)
+        : (greeting || defaultGreeting);
 
     const suggestedQuestionsHTML = suggestedQuestions.length > 0
         ? `
@@ -132,6 +134,14 @@ export function renderChatWidget(options = {}) {
                 background: white;
                 color: #ef4444;
                 transform: scale(1.1);
+            }
+            .book-like-btn.saved {
+                background: rgba(239, 68, 68, 0.15);
+                color: #ef4444;
+            }
+            .book-like-btn.saved:hover {
+                background: rgba(239, 68, 68, 0.25);
+                color: #dc2626;
             }
             .book-card-details {
                 padding: 10px;
@@ -271,26 +281,14 @@ export function initChatWidget() {
     // Restore previous session on init
     restoreChatSession();
 
-    // Global function to save book from chat card like button
-    window.saveBookFromChat = async function (bookId) {
-        try {
-            const token = localStorage.getItem('auth_token');
-            if (!token) {
-                alert('Please log in to save books');
-                return;
-            }
-            const response = await fetch(`${API_BASE_URL}/saved-books/${parseInt(bookId, 10)}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }
-            });
-            if (response.ok) {
-                alert('Book saved to your collection!');
-            } else if (response.status === 400) {
-                alert('Book already saved!');
-            }
-        } catch (error) {
-            console.error('Error saving book:', error);
-        }
+    window.saveBookFromChat = function (bookId) {
+        // Delegate to internal handler
+        handleSaveBook(bookId);
+    };
+
+    // Global function to toggle save/unsave from chat card like button
+    window.toggleSaveBookFromChat = async function (bookId) {
+        await handleToggleSaveBook(bookId);
     };
 
     // Toggle panel open/close
@@ -327,10 +325,15 @@ export function initChatWidget() {
 
         // Reset chat UI to default greeting without page reload
         if (chatMessages) {
+            const resetUser = getCurrentUser();
+            const resetName = resetUser?.full_name?.split(' ')[0] || null;
+            const resetGreeting = resetName
+                ? `Hey ${resetName}! What are you in the mood to read today? 📚`
+                : "Hello! I'm your AI assistant. How can I help you today?";
             chatMessages.innerHTML = `
                 <div class="flex justify-start">
                     <div class="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg max-w-[85%]">
-                        <p class="text-sm text-[#111418] dark:text-gray-200">Hello! I'm your AI assistant. How can I help you today?</p>
+                        <p class="text-sm text-[#111418] dark:text-gray-200">${resetGreeting}</p>
                     </div>
                 </div>
             `;
@@ -543,8 +546,9 @@ export function initChatWidget() {
                 // Show ONLY clean plain text during streaming
                 // Strip all special formats completely
                 const plainText = fullResponse
-                    .replace(/\d*\.?\s*BOOK\[[^\]]+\]/gi, '')  // Remove BOOK[...] completely
-                    .replace(/\[SAVE_BOOK:\d+\]/gi, '')        // Remove save actions
+                    .replace(/\d*\.?\s*BOOK\[[^\]]+\]/gi, '')
+                    .replace(/\[SAVE_BOOK:\d+\]/gi, '')
+                    .replace(/<!--\s*IDs:[\s\S]*?-->/g, '')
                     .trim();
                 aiMessage.textContent = plainText;
                 chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -557,7 +561,15 @@ export function initChatWidget() {
             const jsonPart = parts[1] ? JSON.parse(parts[1]) : null;
 
             const { formattedResponse, bookIdToSave } = processResponseActions(textPart);
-            aiMessage.innerHTML = formatResponseWithImages(formattedResponse, jsonPart);
+
+            // Fetch saved book IDs to show filled hearts on already-saved books
+            let savedIds = new Set();
+            if (jsonPart && jsonPart.length > 0) {
+                const bookIds = jsonPart.map(b => parseInt(b.id));
+                savedIds = await getSavedBookIds(bookIds);
+            }
+
+            aiMessage.innerHTML = formatResponseWithImages(formattedResponse, jsonPart, savedIds);
             chatMessages.scrollTop = chatMessages.scrollHeight;
 
             // Handle save book action if detected
@@ -602,9 +614,11 @@ export function initChatWidget() {
         const saveMatch = response.match(/\[SAVE_BOOK:(\d+)\]/);
         if (saveMatch) {
             bookIdToSave = parseInt(saveMatch[1], 10);
-            // Remove the action tag from displayed response
-            formattedResponse = response.replace(/\[SAVE_BOOK:\d+\]/g, '').trim();
+            formattedResponse = formattedResponse.replace(/\[SAVE_BOOK:\d+\]/g, '');
         }
+
+        // ALWAYS strip hidden ID tracking tags (regardless of SAVE_BOOK)
+        formattedResponse = formattedResponse.replace(/<!--\s*IDs:[\s\S]*?-->/g, '').trim();
 
         return { formattedResponse, bookIdToSave };
     }
@@ -614,7 +628,7 @@ export function initChatWidget() {
      * @param {number} bookId - ID of book to save
      */
     async function handleSaveBook(bookId) {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('auth_token');
         if (!token) {
             // Not logged in - show message to user
             chatMessages.innerHTML += `
@@ -638,6 +652,8 @@ export function initChatWidget() {
             });
 
             if (response.ok) {
+                // Update heart button visually
+                updateHeartButton(bookId, true);
                 chatMessages.innerHTML += `
                     <div class="flex justify-start">
                         <div class="bg-green-100 dark:bg-green-900/30 p-3 rounded-lg max-w-[85%]">
@@ -653,15 +669,85 @@ export function initChatWidget() {
         }
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
+
+    async function handleToggleSaveBook(bookId) {
+        const token = localStorage.getItem('auth_token');
+        if (!token) {
+            chatMessages.innerHTML += `
+                <div class="flex justify-start">
+                    <div class="bg-yellow-100 dark:bg-yellow-900/30 p-3 rounded-lg max-w-[85%]">
+                        <p class="text-sm text-yellow-700 dark:text-yellow-400">Please log in to save books to your collection.</p>
+                    </div>
+                </div>
+            `;
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            return;
+        }
+
+        // Check current state from the button
+        const btn = document.querySelector(`[data-book-save-id="${bookId}"]`);
+        const isSaved = btn && btn.classList.contains('saved');
+
+        try {
+            if (isSaved) {
+                // Unsave
+                const response = await fetch(`${API_BASE_URL}/saved-books/${bookId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                });
+                if (response.ok) {
+                    updateHeartButton(bookId, false);
+                }
+            } else {
+                // Save
+                const response = await fetch(`${API_BASE_URL}/saved-books/${bookId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                });
+                if (response.ok) {
+                    updateHeartButton(bookId, true);
+                    chatMessages.innerHTML += `
+                        <div class="flex justify-start">
+                            <div class="bg-green-100 dark:bg-green-900/30 p-3 rounded-lg max-w-[85%]">
+                                <p class="text-sm text-green-700 dark:text-green-400">✓ Book saved to your collection!</p>
+                            </div>
+                        </div>
+                    `;
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }
+            }
+        } catch (error) {
+            console.error('Error toggling save:', error);
+        }
+    }
+
+    function updateHeartButton(bookId, isSaved) {
+        const btn = document.querySelector(`[data-book-save-id="${bookId}"]`);
+        if (!btn) return;
+        const icon = btn.querySelector('.material-symbols-outlined');
+        if (isSaved) {
+            btn.classList.add('saved');
+            btn.title = 'Saved to collection';
+            if (icon) icon.textContent = 'favorite';
+        } else {
+            btn.classList.remove('saved');
+            btn.title = 'Save to my books';
+            if (icon) icon.textContent = 'favorite';
+        }
+    }
 }
 
 /**
  * Formats response text with book cards and markdown rendering
  * @param {string} text - Response text to format
  * @param {Array} bookData - Optional array of book objects to render cards
+ * @param {Set} savedBookIds - Set of book IDs that are already saved
  * @returns {string} HTML formatted text with book cards
  */
-function formatResponseWithImages(text, bookData = null) {
+function formatResponseWithImages(text, bookData = null, savedBookIds = new Set()) {
     if (!text) return '';
 
     // Clean text of technical tags if any leak through
@@ -694,7 +780,7 @@ function formatResponseWithImages(text, bookData = null) {
                     <a href="book-details.html?id=${book.id}" target="_blank">
                         ${coverHtml}
                     </a>
-                    <button class="book-like-btn" onclick="event.preventDefault(); window.saveBookFromChat('${book.id}')" title="Save to my books">
+                    <button class="book-like-btn${savedBookIds.has(parseInt(book.id)) ? ' saved' : ''}" data-book-save-id="${book.id}" onclick="event.preventDefault(); window.toggleSaveBookFromChat('${book.id}')" title="${savedBookIds.has(parseInt(book.id)) ? 'Saved to collection' : 'Save to my books'}">
                         <span class="material-symbols-outlined" style="font-size:20px;">favorite</span>
                     </button>
                 </div>

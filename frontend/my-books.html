@@ -212,22 +212,15 @@
 
         // Functions are now imported from user-books.js module above
 
-        function removeLiked(bookId) {
-            removeFromLiked(bookId);
-            // Adjust current page if needed
-            const totalLiked = getLikedBooks().length;
-            const maxPages = Math.ceil(totalLiked / pageSize);
-            if (likedCurrentPage >= maxPages && maxPages > 0) {
-                likedCurrentPage = maxPages - 1;
-            }
+        async function removeLiked(bookId) {
+            await removeFromLiked(bookId);
             loadMyBooks();
         }
 
-        function removeBorrowed(bookId) {
-            removeFromBorrowed(bookId);
-            // Adjust current page if needed
-            const totalBorrowed = getBorrowedBooks().length;
-            const maxPages = Math.ceil(totalBorrowed / pageSize);
+        async function removeBorrowed(bookId) {
+            await removeFromBorrowed(bookId);
+            const allBorrowed = await getBorrowedBooks();
+            const maxPages = Math.ceil(allBorrowed.length / pageSize);
             if (borrowedCurrentPage >= maxPages && maxPages > 0) {
                 borrowedCurrentPage = maxPages - 1;
             }
@@ -333,9 +326,10 @@
             pagination.innerHTML = html;
         }
 
-        function goToPage(sectionType, page) {
+        async function goToPage(sectionType, page) {
             if (sectionType === 'liked') {
-                const totalPages = Math.ceil(getLikedBooks().length / pageSize);
+                const allLiked = await getLikedBooks();
+                const totalPages = Math.ceil(allLiked.length / pageSize);
                 if (page < 0 || page >= totalPages) return;
                 likedCurrentPage = page;
                 // Scroll to section
@@ -345,7 +339,8 @@
                 }
                 loadLikedBooks();
             } else {
-                const totalPages = Math.ceil(getBorrowedBooks().length / pageSize);
+                const allBorrowed = await getBorrowedBooks();
+                const totalPages = Math.ceil(allBorrowed.length / pageSize);
                 if (page < 0 || page >= totalPages) return;
                 borrowedCurrentPage = page;
                 // Scroll to section
@@ -357,7 +352,7 @@
             }
         }
 
-        function loadLikedBooks() {
+        async function loadLikedBooks() {
             const likedGrid = document.getElementById('liked-books-grid');
             const likedPagination = document.getElementById('liked-pagination');
             const likedSection = document.getElementById('liked-section');
@@ -365,8 +360,13 @@
             if (!likedGrid) return;
 
             try {
-                const allLikedBooks = getLikedBooks();
+                const allLikedBooks = await getLikedBooks();
                 const totalPages = Math.ceil(allLikedBooks.length / pageSize);
+
+                // Adjust page if out of bounds
+                if (likedCurrentPage >= totalPages && totalPages > 0) {
+                    likedCurrentPage = totalPages - 1;
+                }
 
                 if (allLikedBooks.length === 0) {
                     likedGrid.innerHTML = '<div class="col-span-5 text-center py-8 text-gray-500 dark:text-gray-400">No liked books yet.</div>';
@@ -395,7 +395,7 @@
             }
         }
 
-        function loadBorrowedBooks() {
+        async function loadBorrowedBooks() {
             const borrowedGrid = document.getElementById('borrowed-books-grid');
             const borrowedPagination = document.getElementById('borrowed-pagination');
             const borrowedSection = document.getElementById('borrowed-section');
@@ -403,7 +403,7 @@
             if (!borrowedGrid) return;
 
             try {
-                const allBorrowedBooks = getBorrowedBooks();
+                const allBorrowedBooks = await getBorrowedBooks();
                 const totalPages = Math.ceil(allBorrowedBooks.length / pageSize);
 
                 if (allBorrowedBooks.length === 0) {
@@ -439,8 +439,8 @@
             const borrowedSection = document.getElementById('borrowed-section');
 
             try {
-                const allLikedBooks = getLikedBooks();
-                const allBorrowedBooks = getBorrowedBooks();
+                const allLikedBooks = await getLikedBooks();
+                const allBorrowedBooks = await getBorrowedBooks();
 
                 // Reset pagination if needed
                 if (allLikedBooks.length === 0) {
@@ -451,8 +451,8 @@
                 }
 
                 // Load both sections
-                loadLikedBooks();
-                loadBorrowedBooks();
+                await loadLikedBooks();
+                await loadBorrowedBooks();
 
                 // Show empty state only if both are empty
                 if (allLikedBooks.length === 0 && allBorrowedBooks.length === 0) {

@@ -21,7 +21,7 @@ function getApiBaseUrl() {
     return '/api';
 }
 
-const API_BASE_URL = getApiBaseUrl();
+export const API_BASE_URL = getApiBaseUrl();
 
 /**
  * Fetch books from the API with optional filters and pagination.

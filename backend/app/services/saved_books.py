@@ -57,3 +57,15 @@ def is_book_saved(session: Session, *, user_id: int, book_id: int) -> bool:
     """Check if a book is saved by a user."""
     return get_saved_book(session, user_id=user_id, book_id=book_id) is not None
 
+
+def get_saved_book_ids(session: Session, *, user_id: int, book_ids: Optional[List[int]] = None) -> set[int]:
+    """Get the set of book IDs that are saved by the user.
+    
+    If book_ids is provided, only checks those IDs (efficient batch check).
+    Otherwise returns all saved book IDs for the user.
+    """
+    stmt = select(SavedBook.book_id).where(SavedBook.user_id == user_id)
+    if book_ids:
+        stmt = stmt.where(SavedBook.book_id.in_(book_ids))
+    return set(session.scalars(stmt))
+

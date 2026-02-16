@@ -23,29 +23,36 @@ class ChatMessage(BaseModel):
 class ChatRequest(BaseModel):
     """Request model for chat endpoint."""
     messages: List[ChatMessage]
+    session_id: Optional[str] = None
 
 
 from app.models import User
-from app.api.dependencies import get_current_user
+from app.api.dependencies import get_current_user, get_current_user_optional
 
 @router.post("/")
 async def chat(
     request: ChatRequest,
-    current_user: User = Depends(get_current_user)
+    current_user: Optional[User] = Depends(get_current_user_optional)
 ):
     """
     Send a message and get a streaming response from the library assistant.
     Supports conversation history for multi-turn conversations.
     """
-    with get_session() as session:
-        async def stream_response():
-            async for chunk in generate_response(session, request.messages, user=current_user):
+    # Default to "guest" if not provided, but ideally frontend sends a UUID
+    session_id = request.session_id or "guest"
+
+    async def stream_response():
+        # Session must be created INSIDE the generator so it stays open
+        # during streaming. If created outside (with `with get_session()`),
+        # the context manager exits before streaming starts, closing the session.
+        with get_session() as session:
+            async for chunk in generate_response(session, request.messages, user=current_user, session_id=session_id):
                 yield chunk
-        
-        return StreamingResponse(
-            stream_response(),
-            media_type="text/plain"
-        )
+
+    return StreamingResponse(
+        stream_response(),
+        media_type="text/plain"
+    )
 
 
 @router.post("/sync")
@@ -57,9 +64,11 @@ def chat_sync(request: ChatRequest):
     import asyncio
     
     with get_session() as session:
+        session_id = request.session_id or "guest"
+        
         async def collect_response():
             chunks = []
-            async for chunk in generate_response(session, request.messages):
+            async for chunk in generate_response(session, request.messages, session_id=session_id):
                 chunks.append(chunk)
             return "".join(chunks)
         

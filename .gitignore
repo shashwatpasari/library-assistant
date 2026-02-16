@@ -1,66 +1,61 @@
-
+# ===========================================
 # Python
+# ===========================================
 __pycache__/
 *.py[cod]
 *$py.class
+*.log
 venv/
 .venv/
 env/
 .env
+.pytest_cache/
 
+# ===========================================
 # Node
+# ===========================================
 node_modules/
 dist/
+dist-ssr/
 npm-debug.log*
 
+# ===========================================
 # Database
+# ===========================================
 *.db
 *.sqlite3
 postgres_data/
-backend/library.db
 
-# OS
+# ===========================================
+# OS & Editor
+# ===========================================
 .DS_Store
 .idea/
 .vscode/
+*.sw?
+*.local
 
+# ===========================================
 # Docker
+# ===========================================
 docker-compose.override.yml
 
 # ===========================================
-# Backend Scripts - Data Files (IGNORE)
+# Data Files (large / generated)
 # ===========================================
-# Large data files that shouldn't be in git
 backend/scripts/*.csv
 backend/scripts/*.zip
 backend/scripts/*.ipynb
 backend/scripts/*.json
+backend/books_to_enrich.json
+backend/enriched_books.json
+*.zip
 
 # Keep sample CSV for reference
 !backend/scripts/goodreads_list_books_sample.csv
 
 # ===========================================
-# Backend Scripts - Python Files (KEEP)
-# ===========================================
-# These are the utility scripts we want to keep:
-# - extract_goodreads_list.py: Scrapes book data from Goodreads lists
-# - import_goodreads_csv.py: Imports books from CSV to database
-# - migrate_to_postgres.py: Migrates SQLite to PostgreSQL
-# - enrich_books.py: Enriches books with Gemini API
-# - offline_enrich.py: Offline book enrichment
-# - import_enriched_csv.py: Imports enriched book data
-# - reembed_books.py: Regenerates embeddings for books
-# - seed_books.py: Seeds initial book data
-# - export_books.py: Exports books to file
-
-# ===========================================
-# Backend Root - Data Files (IGNORE)
-# ===========================================
-backend/books_to_enrich.json
-backend/enriched_books.json
-
-# ===========================================
-# Temporary/Debug Scripts (IGNORE)
+# Temporary / Debug Scripts
 # ===========================================
 backend/scripts/delete_users.py
 backend/scripts/test_workflow.py
@@ -69,15 +64,14 @@ backend/scripts/extract_goodreads.py
 backend/scripts/enrich_isbn_from_csv.py
 backend/scripts/import_results.py
 
-# Documentation (optional)
+# ===========================================
+# Frontend scratch / design mockups
+# ===========================================
+frontend/stitch_*/
+frontend/IMAGE_OPTIMIZATION.md
+
+# ===========================================
+# Documentation (kept at root only)
+# ===========================================
 docs/
 backend/docs/
-
-# Frontend scratch/dev directories
-frontend/stitch_book_details_and_chat/
-
-# Markdown files in subdirectories (keep only root README.md)
-frontend/*.md
-backend/docs/*.md
-*.sql
-*.zip

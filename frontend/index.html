@@ -47,6 +47,7 @@
         .line-clamp-2 {
             display: -webkit-box;
             -webkit-line-clamp: 2;
+            line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -144,7 +145,7 @@
         <div id="chat-widget-container"></div>
     </div>
     <script type="module">
-        import { fetchBooks, getBookCoverUrl, formatAuthors } from './src/services/api.js';
+        import { fetchBooks, getBookCoverUrl, formatAuthors, API_BASE_URL } from './src/services/api.js';
         import { renderHeader, initHeader } from './src/components/header.js';
         import { renderChatWidget, initChatWidget } from './src/components/chat-widget.js';
         import { isAuthenticated } from './src/services/auth.js';
@@ -153,12 +154,6 @@
         if (!isAuthenticated()) {
             window.location.href = 'login.html';
         }
-
-        // Dynamic API URL - works in both dev and production
-        const hostname = window.location.hostname;
-        const API_BASE = (hostname === 'localhost' || hostname === '127.0.0.1')
-            ? 'http://localhost:8000'
-            : '/api';
 
         // Initialize header
         document.getElementById('header-container').innerHTML = renderHeader();
@@ -184,7 +179,7 @@
          * Fetch personalized recommendations for logged-in users
          */
         async function fetchRecommendations(token) {
-            const res = await fetch(`${API_BASE}/users/me/recommendations?limit=20`, {
+            const res = await fetch(`${API_BASE_URL}/users/me/recommendations?limit=20`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }

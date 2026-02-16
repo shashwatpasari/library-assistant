@@ -5,6 +5,7 @@ API routes for saved books (user's book wishlist/favorites).
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.api.dependencies import db_session_dependency
@@ -15,6 +16,27 @@ from app.services import saved_books as saved_books_service
 from app.services import books as book_service
 
 router = APIRouter(prefix="/saved-books", tags=["saved-books"])
+
+
+class BatchCheckRequest(BaseModel):
+    book_ids: List[int]
+
+
+class BatchCheckResponse(BaseModel):
+    saved_ids: List[int]
+
+
+@router.post("/check-batch", response_model=BatchCheckResponse)
+def check_batch_saved(
+    req: BatchCheckRequest,
+    session: Session = Depends(db_session_dependency),
+    current_user: User = Depends(get_current_user),
+) -> BatchCheckResponse:
+    """Check which books from a list are saved by the current user."""
+    saved = saved_books_service.get_saved_book_ids(
+        session, user_id=current_user.id, book_ids=req.book_ids
+    )
+    return BatchCheckResponse(saved_ids=list(saved))
 
 
 @router.get("", response_model=List[SavedBookRead])
