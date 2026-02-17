@@ -173,3 +173,44 @@ export async function removeFromBorrowed(bookId) {
         return false;
     }
 }
+/**
+ * Borrow a book via backend API.
+ */
+export async function borrowBook(bookId) {
+    const token = localStorage.getItem('auth_token');
+    if (!token) return false;
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/borrowed-books/${bookId}`, {
+            method: 'POST',
+            headers: getAuthHeaders(),
+        });
+        return response.ok;
+    } catch (error) {
+        console.error('Error borrowing book:', error);
+        return false;
+    }
+}
+
+/**
+ * Check if a specific book is borrowed.
+ */
+export async function isBookBorrowed(bookId) {
+    const borrowedBooks = await getBorrowedBooks();
+    // getBorrowedBooks returns the BOOK objects, so we compare book.id
+    return borrowedBooks.some(book => book.id === parseInt(bookId));
+}
+
+/**
+ * Toggle borrow status for a book.
+ */
+export async function toggleBorrow(book) {
+    const bookId = book.id;
+    const isBorrowed = await isBookBorrowed(bookId);
+
+    if (isBorrowed) {
+        return await removeFromBorrowed(bookId);
+    } else {
+        return await borrowBook(bookId);
+    }
+}

@@ -60,6 +60,19 @@ def list_borrowed_books(
     return result
 
 
+@router.post("/{book_id}")
+def borrow_book_endpoint(
+    book_id: int,
+    session: Session = Depends(db_session_dependency),
+    current_user: User = Depends(get_current_user),
+):
+    """Borrow a book."""
+    from app.services.borrow import borrow_book
+    success, message = borrow_book(session, user_id=current_user.id, book_id=book_id)
+    if not success:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=message)
+    return {"message": message}
+
 @router.post("/{book_id}/return")
 def return_borrowed_book(
     book_id: int,
