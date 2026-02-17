@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+venv/
+.venv/
+env/
+
+# Environment files (secrets should NOT be baked into the image)
+.env
+.env.*
+
+# IDE
+.vscode/
+.idea/
+*.sw?
+
+# Data & scripts not needed at runtime
+scripts/*.csv
+scripts/*.zip
+scripts/*.json
+scripts/*.ipynb
+
+# Tests (not needed in production image)
+tests/
+
+# Docs
+docs/
+*.md

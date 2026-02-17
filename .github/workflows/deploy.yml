@@ -8,8 +8,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 45  # Overall job timeout
-    
+    timeout-minutes: 30
+
     steps:
       - name: Deploy to GCP VM
         uses: appleboy/ssh-action@v1.0.3
@@ -17,19 +17,30 @@ jobs:
           host: ${{ secrets.GCP_HOST }}
           username: ${{ secrets.GCP_USERNAME }}
           key: ${{ secrets.GCP_SSH_KEY }}
-          timeout: 30m  # SSH command timeout
-          command_timeout: 30m  # Individual command timeout
+          timeout: 25m
+          command_timeout: 25m
           script: |
+            set -e  # Exit on any error
+
             cd ~/library-assistant
-            
+
             # Pull latest code
+            echo "📥 Pulling latest code..."
             git pull origin main
-            
-            # Rebuild and restart containers
-            docker compose build --no-cache
-            docker compose up -d
-            
-            # Clean up old images
+
+            # Rebuild and restart containers (uses cache for unchanged layers)
+            echo "🔨 Building and starting containers..."
+            docker compose up -d --build
+
+            # Wait for services to be healthy
+            echo "⏳ Waiting for services to be healthy..."
+            sleep 10
+
+            # Verify containers are running
+            echo "🔍 Checking container status..."
+            docker compose ps
+
+            # Clean up old/dangling images
             docker image prune -f
-            
+
             echo "✅ Deployment complete!"

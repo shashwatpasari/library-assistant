@@ -1,4 +1,4 @@
-# Stage 1: Build the React application
+# Stage 1: Build the frontend application
 FROM node:20-alpine AS build
 
 WORKDIR /app
@@ -29,6 +29,10 @@ COPY nginx.conf /etc/nginx/conf.d
 
 # Expose port 80
 EXPOSE 80
+
+# Healthcheck
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+    CMD wget -qO- http://localhost:80/ || exit 1
 
 # Start Nginx
 CMD ["nginx", "-g", "daemon off;"]
